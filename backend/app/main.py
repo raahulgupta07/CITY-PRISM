@@ -9,7 +9,7 @@ from fastapi.responses import FileResponse
 
 from app.config import get_settings
 from app.db.base import SessionLocal
-from app.routers import admin, auth, framework, health, projects
+from app.routers import admin, agent, auth, framework, health, projects
 
 
 @asynccontextmanager
@@ -36,7 +36,14 @@ def create_app() -> FastAPI:
         redoc_url=None,
         openapi_url="/api/openapi.json" if settings.env != "prod" else None,
     )
-    for router in (health.router, auth.router, framework.router, projects.router, admin.router):
+    for router in (
+        health.router,
+        auth.router,
+        framework.router,
+        projects.router,
+        agent.router,
+        admin.router,
+    ):
         app.include_router(router, prefix="/api")
 
     build_dir = settings.frontend_build_dir.resolve()

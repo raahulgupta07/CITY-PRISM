@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import json
 from collections.abc import Iterator
 from pathlib import Path
 
+import httpx
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
@@ -57,3 +59,53 @@ def project_id(client: TestClient, name: str) -> str:
         if p["name"] == name:
             return p["id"]
     raise AssertionError(f"no project {name}")
+
+
+class FakeOpenRouter:
+    """Stands in for OpenRouter. Queue replies; inspect what was sent."""
+
+    def __init__(self) -> None:
+        self.replies: list[httpx.Response | Exception] = []
+        self.requests: list[dict] = []
+
+    def reply(self, content: object, *, status: int = 200, cost: float = 0.0001) -> None:
+        text = content if isinstance(content, str) else json.dumps(content)
+        body = {
+            "choices": [{"message": {"content": text}}],
+            "usage": {"prompt_tokens": 120, "completion_tokens": 30, "cost": cost},
+        }
+        self.replies.append(httpx.Response(status, json=body))
+
+    def fail(self, exc: Exception) -> None:
+        self.replies.append(exc)
+
+    def handler(self, request: httpx.Request) -> httpx.Response:
+        self.requests.append(
+            {
+                "url": str(request.url),
+                "headers": dict(request.headers),
+                "json": json.loads(request.content),
+            }
+        )
+        item = self.replies.pop(0)
+        if isinstance(item, Exception):
+            raise item
+        return item
+
+    @property
+    def last_prompt(self) -> str:
+        return self.requests[-1]["json"]["messages"][0]["content"]
+
+
+@pytest.fixture
+def fake_llm(settings_env, monkeypatch: pytest.MonkeyPatch) -> Iterator[FakeOpenRouter]:
+    from app.llm import client as llm
+
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
+    monkeypatch.setenv("OPENROUTER_BASE_URL", "https://openrouter.test/api/v1")
+    monkeypatch.setenv("LLM_MODEL_FAST", "fast-model")
+    monkeypatch.setenv("LLM_MODEL_DEFAULT", "default-model")
+    get_settings.cache_clear()
+    fake = FakeOpenRouter()
+    monkeypatch.setattr(llm, "transport", httpx.MockTransport(fake.handler))
+    yield fake

@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.auth.deps import require_role
 from app.db.base import get_db
-from app.db.models import Dimension, Question, User
+from app.db.models import AICall, Dimension, Question, User
 from app.routers.schemas import (
     DimensionUpdate,
     QuestionOut,
@@ -83,3 +83,28 @@ def update_user(user_id: str, body: UserUpdate, db: Session = Depends(get_db)) -
         user.name = body.name.strip()
     db.commit()
     return user
+
+
+@router.get("/ai-calls")
+def ai_calls(
+    limit: int = Query(default=200, ge=1, le=1000), db: Session = Depends(get_db)
+) -> list[dict]:
+    """The AI call log, newest first. No prompt or reply text is stored."""
+    rows = db.scalars(select(AICall).order_by(AICall.id.desc()).limit(limit)).all()
+    return [
+        {
+            "id": r.id,
+            "user_id": r.user_id,
+            "project_id": r.project_id,
+            "feature": r.feature,
+            "model": r.model,
+            "prompt_tokens": r.prompt_tokens,
+            "completion_tokens": r.completion_tokens,
+            "cost_usd": r.cost_usd,
+            "latency_ms": r.latency_ms,
+            "ok": r.ok,
+            "error": r.error,
+            "created_at": r.created_at.isoformat(),
+        }
+        for r in rows
+    ]

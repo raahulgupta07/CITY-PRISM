@@ -197,3 +197,50 @@ class UserCreate(BaseModel):
 class UserUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=200)
     role: Role | None = None
+
+
+# ---- Agent ----
+
+
+class InterviewIn(BaseModel):
+    question_id: str
+    reply: str = Field(min_length=1, max_length=2000)
+    context: str = Field(default="", max_length=2000)
+
+
+class InterviewOut(BaseModel):
+    answer: str  # "Yes" | "Partly" | "No" | "Don't know" | "" (needs a follow-up)
+    evidence: str
+    followUp: str  # noqa: N815 (name from SPEC 6.2)
+    saved: AnswerSaved | None
+
+
+class SuggestionOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    question_id: str
+    answer: str
+    evidence: str
+    source_excerpt: str
+    status: str
+    created_at: datetime
+
+
+class EvidenceOut(BaseModel):
+    file_id: str
+    filename: str
+    chars_read: int
+    truncated: bool
+    suggestions: list[SuggestionOut]
+
+
+class SuggestionDone(BaseModel):
+    suggestion: SuggestionOut
+    saved: AnswerSaved | None
+
+
+class AcceptAllOut(BaseModel):
+    accepted: int
+    answers: list[AnswerOut]
+    score: ScoreOut

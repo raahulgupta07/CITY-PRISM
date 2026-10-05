@@ -5,6 +5,7 @@
 		api,
 		MODE_LABELS,
 		STAGES,
+		type AcceptAllOut,
 		type AnswerRow,
 		type AnswerSaved,
 		type AnswerValue,
@@ -14,7 +15,9 @@
 		type Score,
 		type Stage
 	} from '$lib/api';
+	import EvidenceTab from '$lib/components/EvidenceTab.svelte';
 	import HistoryPanel from '$lib/components/HistoryPanel.svelte';
+	import InterviewTab from '$lib/components/InterviewTab.svelte';
 	import QuestionRow from '$lib/components/QuestionRow.svelte';
 	import VerdictMark from '$lib/components/VerdictMark.svelte';
 	import { scoreProject } from '$lib/scoring';
@@ -29,6 +32,7 @@
 	let score = $state<Score | null>(null);
 	let history = $state<HistoryRow[]>([]);
 	let historyFor = $state<string | null>(null);
+	let agentTab = $state<'interview' | 'evidence' | 'changes'>('interview');
 	let current = $state(1);
 	let status = $state<Record<string, string>>({});
 	let error = $state('');
@@ -75,6 +79,25 @@
 	}
 
 	/** Save one answer. The score updates at once; the server result replaces it. */
+	/** Apply an answer saved by the agent (interview, undo, accepted suggestion). */
+	function applySaved(res: AnswerSaved) {
+		answers[res.answer.question_id] = res.answer;
+		score = res.score;
+		if (res.changed) loadHistory();
+	}
+
+	function applyAcceptAll(res: AcceptAllOut) {
+		for (const a of res.answers) answers[a.question_id] = a;
+		score = res.score;
+		loadHistory();
+	}
+
+	/** Show the dimension that holds this question. */
+	function focusQuestion(qid: string) {
+		const dimId = Number(qid.split('.')[0]);
+		if (dimId) current = dimId;
+	}
+
 	function save(qid: string, answer: AnswerValue | null, evidence: string) {
 		const before = answers[qid];
 		answers[qid] = {
@@ -346,7 +369,10 @@
 							onanswer={(v, evidence) => save(q.id, v, evidence)}
 							onevidence={(evidence) => save(q.id, answers[q.id]?.answer ?? null, evidence)}
 							onconfirm={() => confirmAnswer(q.id)}
-							onhistory={() => (historyFor = q.id)}
+							onhistory={() => {
+								historyFor = q.id;
+								agentTab = 'changes';
+							}}
 						/>
 					{/each}
 
@@ -366,8 +392,64 @@
 			</div>
 		</main>
 
-		<aside class="border-t border-line bg-panel lg:border-t-0 lg:border-l" aria-label="Changes">
-			<HistoryPanel rows={history} questionId={historyFor} onclear={() => (historyFor = null)} />
+		<aside
+			class="flex flex-col border-t border-line bg-panel lg:sticky lg:top-0 lg:h-screen lg:border-t-0 lg:border-l"
+			aria-label="Agent"
+		>
+			<div role="tablist" aria-label="Agent" class="grid shrink-0 grid-cols-3 border-b border-line">
+				{#each [['interview', 'Interview'], ['evidence', 'Read evidence'], ['changes', 'Changes']] as const as [key, label] (key)}
+					<button
+						type="button"
+						role="tab"
+						id="agent-tab-{key}"
+						aria-selected={agentTab === key}
+						aria-controls="agent-panel"
+						class="min-h-12 px-2 text-sm {agentTab === key
+							? 'font-semibold shadow-[inset_0_-2px_0_var(--color-teal)]'
+							: 'bg-[#F7F8F9] text-muted hover:text-ink'}"
+						onclick={() => (agentTab = key)}>{label}</button
+					>
+				{/each}
+			</div>
+			<div
+				id="agent-panel"
+				role="tabpanel"
+				aria-labelledby="agent-tab-{agentTab}"
+				class="min-h-0 flex-1"
+			>
+				{#if agentTab === 'changes'}
+					<HistoryPanel
+						rows={history}
+						questionId={historyFor}
+						onclear={() => (historyFor = null)}
+					/>
+				{:else if !canEdit}
+					<p class="p-4 text-sm text-muted">
+						Only the project owner, reviewers and admins can use the agent on this project.
+					</p>
+				{:else}
+					<!-- Both stay mounted so switching tabs keeps the conversation. -->
+					<div class="h-full" hidden={agentTab !== 'interview'}>
+						<InterviewTab
+							projectId={id}
+							{dims}
+							{answers}
+							{current}
+							onsaved={applySaved}
+							onfocus={focusQuestion}
+						/>
+					</div>
+					<div class="h-full" hidden={agentTab !== 'evidence'}>
+						<EvidenceTab
+							projectId={id}
+							{dims}
+							onsaved={applySaved}
+							onacceptall={applyAcceptAll}
+							onfocus={focusQuestion}
+						/>
+					</div>
+				{/if}
+			</div>
 		</aside>
 	</div>
 {/if}

@@ -13,7 +13,11 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
 	const res = await fetch(`/api${path}`, {
 		credentials: 'same-origin',
 		...init,
-		headers: { 'Content-Type': 'application/json', ...(init.headers ?? {}) }
+		// Let the browser set the multipart boundary for file uploads.
+		headers:
+			init.body instanceof FormData
+				? (init.headers ?? {})
+				: { 'Content-Type': 'application/json', ...(init.headers ?? {}) }
 	});
 	if (!res.ok) {
 		let message = 'Something went wrong. Please try again.';
@@ -167,4 +171,42 @@ export interface HistoryRow {
 	source: 'person' | 'ai_interview' | 'ai_evidence' | 'confirm' | 'undo';
 	changed_by: UserRef | null;
 	changed_at: string;
+}
+
+// ---- Agent ----
+
+export interface InterviewOut {
+	answer: 'Yes' | 'Partly' | 'No' | "Don't know" | '';
+	evidence: string;
+	followUp: string;
+	saved: AnswerSaved | null;
+}
+
+export interface Suggestion {
+	id: string;
+	question_id: string;
+	answer: 'Yes' | 'Partly' | 'No';
+	evidence: string;
+	source_excerpt: string;
+	status: 'pending' | 'accepted' | 'dismissed';
+	created_at: string;
+}
+
+export interface EvidenceOut {
+	file_id: string;
+	filename: string;
+	chars_read: number;
+	truncated: boolean;
+	suggestions: Suggestion[];
+}
+
+export interface SuggestionDone {
+	suggestion: Suggestion;
+	saved: AnswerSaved | null;
+}
+
+export interface AcceptAllOut {
+	accepted: number;
+	answers: AnswerRow[];
+	score: Score;
 }

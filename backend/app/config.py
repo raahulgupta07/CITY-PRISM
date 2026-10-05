@@ -32,6 +32,7 @@ class Settings(BaseSettings):
     openrouter_base_url: str = "https://openrouter.ai/api/v1"
     llm_model_fast: str = ""
     llm_model_default: str = ""
+    llm_timeout_seconds: float = 60.0
 
     @model_validator(mode="after")
     def _check(self) -> Settings:

@@ -128,7 +128,8 @@ Server
 4. `POST /api/projects/:id/agent/interview` (fast model) → `{answer, evidence, followUp}`. A decided answer is saved with `source = ai_interview`.
 5. `POST /api/projects/:id/answers/:qid/undo` reverts the last agent answer; the undo is written to history.
 6. `POST /api/projects/:id/agent/evidence` (default model): pasted text or uploaded file (txt, md, csv, docx, pdf); text extracted on the server; at most 24,000 characters sent; file and text kept in `evidence_files`. Drops unknown IDs and invalid answers. Stores `ai_suggestions` as pending (max 15).
-7. `POST /api/suggestions/:id/accept`, `/dismiss`, `POST /api/projects/:id/suggestions/accept-all`. Accepted → answer with `source = ai_evidence`.
+7. `GET /api/projects/:id/suggestions`, `POST /api/suggestions/:id/accept`, `/dismiss`, `POST /api/projects/:id/suggestions/accept-all`. Accepted → answer with `source = ai_evidence`, confirmed by the person who accepted it (SPEC 4: `confirmed_by`).
+8. `GET /api/admin/ai-calls`: the AI call log for admins (no prompt or reply text is stored).
 
 Screens
 1. Agent panel with Interview and Read evidence tabs.
@@ -137,10 +138,10 @@ Screens
 4. "AI suggested, not confirmed" marker and Confirm button on answers.
 
 Done when
-- [ ] Tests with a mocked OpenRouter: valid reply, vague reply (follow-up), invalid JSON, unknown question ID.
-- [ ] AI answers stay marked until a person confirms or edits them.
-- [ ] Undo works for the last agent answer and is in history.
-- [ ] Every AI call has a row in `ai_calls`. No AI call from the browser (checked in Playwright).
+- [x] Tests with a mocked OpenRouter: valid reply, vague reply (follow-up), invalid JSON, unknown question ID.
+- [x] AI answers stay marked until a person confirms or edits them.
+- [x] Undo works for the last agent answer and is in history.
+- [x] Every AI call has a row in `ai_calls`. No AI call from the browser (checked in Playwright).
 
 ---
 
