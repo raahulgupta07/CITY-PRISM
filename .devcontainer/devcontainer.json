@@ -1,0 +1,15 @@
+{
+	// GitHub Codespaces: builds and starts City Prism in Docker, on port 8080.
+	// Test sign-in is on (ENV=dev). Keep the port private.
+	"name": "City Prism",
+	"image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+	"features": {
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
+	},
+	"hostRequirements": { "cpus": 2, "memory": "4gb" },
+	"forwardPorts": [8080],
+	"portsAttributes": {
+		"8080": { "label": "City Prism", "onAutoForward": "openBrowser" }
+	},
+	"postStartCommand": "docker compose up -d --build"
+}

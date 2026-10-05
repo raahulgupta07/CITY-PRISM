@@ -21,6 +21,13 @@ Open http://localhost:8080. On first start the app creates the database,
 runs migrations and loads the 40 questions and the 12 projects.
 One container serves both the screens and `/api`.
 
+### In GitHub Codespaces (free, nothing to install)
+
+On the repository page: Code → Codespaces → Create codespace. It builds and
+starts the app (a few minutes the first time) and opens port 8080 in the
+browser. Sign in by picking a test user. Keep the port private: the test
+sign-in lets anyone sign in as anyone. Stop the codespace when you are done.
+
 ### For development
 
 Server (port 8080):
