@@ -42,7 +42,7 @@ export interface User {
 }
 
 export interface AuthOptions {
-	provider: 'dev' | 'none';
+	provider: 'dev' | 'oidc' | 'none';
 	users: { name: string; email: string; role: Role }[];
 }
 

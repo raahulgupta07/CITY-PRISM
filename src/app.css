@@ -93,6 +93,16 @@ html {
 	outline-offset: 2px;
 }
 
+/* Keep the dark band and the score colours when printing (browsers drop
+   backgrounds by default, which would leave white text on white paper). */
+@media print {
+	html,
+	.band {
+		print-color-adjust: exact;
+		-webkit-print-color-adjust: exact;
+	}
+}
+
 /* Teal on navy is too dark to see, so the band uses the light teal. */
 .band :focus-visible {
 	outline-color: var(--color-teal-on-dark);

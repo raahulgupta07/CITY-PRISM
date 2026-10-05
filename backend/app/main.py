@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
 
 from app.config import get_settings
@@ -14,6 +15,7 @@ from app.routers import admin, agent, auth, briefs, framework, health, portfolio
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s:     %(name)s %(message)s")
     settings = get_settings()
     if settings.run_migrations_on_start:
         from app.db.migrate import upgrade_to_head
@@ -36,6 +38,17 @@ def create_app() -> FastAPI:
         redoc_url=None,
         openapi_url="/api/openapi.json" if settings.env != "prod" else None,
     )
+
+    @app.middleware("http")
+    async def security_headers(request: Request, call_next):
+        response = await call_next(request)
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("X-Frame-Options", "DENY")
+        response.headers.setdefault("Referrer-Policy", "same-origin")
+        if settings.env == "prod":
+            response.headers.setdefault("Strict-Transport-Security", "max-age=31536000")
+        return response
+
     for router in (
         health.router,
         auth.router,

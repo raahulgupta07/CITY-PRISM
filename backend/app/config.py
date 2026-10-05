@@ -34,13 +34,32 @@ class Settings(BaseSettings):
     llm_model_default: str = ""
     llm_timeout_seconds: float = 60.0
 
+    # Company sign-in (OpenID Connect, e.g. Microsoft Entra ID). Empty issuer = off.
+    public_url: str = ""
+    oidc_issuer: str = ""
+    oidc_client_id: str = ""
+    oidc_client_secret: str = ""
+    # Comma-separated email domains allowed to sign in. Empty = any account the issuer accepts.
+    oidc_allowed_domains: str = ""
+    # Create a project owner account the first time a staff member signs in.
+    oidc_create_users: bool = True
+
     @model_validator(mode="after")
     def _check(self) -> Settings:
         if self.env == "prod" and self.secret_key in ("", DEV_SECRET):
             raise ValueError("Set SECRET_KEY before running with ENV=prod.")
         if not self.secret_key:
             self.secret_key = DEV_SECRET
+        if self.oidc_issuer and not (self.oidc_client_id and self.public_url):
+            raise ValueError("Set OIDC_CLIENT_ID and PUBLIC_URL to use OIDC_ISSUER.")
+        self.public_url = self.public_url.rstrip("/")
+        self.oidc_issuer = self.oidc_issuer.rstrip("/")
         return self
+
+    @property
+    def allowed_domains(self) -> set[str]:
+        parts = self.oidc_allowed_domains.split(",")
+        return {p.strip().lower().lstrip("@") for p in parts if p.strip()}
 
     @property
     def sqlalchemy_url(self) -> str:

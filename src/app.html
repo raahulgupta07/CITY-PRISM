@@ -22,6 +22,11 @@
 				}
 				apply();
 				media.addEventListener('change', apply);
+				// Print on white paper, whatever the theme.
+				addEventListener('beforeprint', function () {
+					document.documentElement.dataset.theme = 'light';
+				});
+				addEventListener('afterprint', apply);
 			})();
 		</script>
 		%sveltekit.head%

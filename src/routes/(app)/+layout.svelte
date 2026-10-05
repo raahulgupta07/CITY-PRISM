@@ -40,7 +40,7 @@
 	class="sr-only z-50 bg-panel p-3 text-ink focus:not-sr-only focus:fixed focus:top-2 focus:left-2"
 	>Skip to content</a
 >
-<header class="band border-b border-band-edge bg-navy text-band-ink">
+<header class="band border-b border-band-edge bg-navy text-band-ink print:hidden">
 	<div class="flex min-h-12 flex-wrap items-center gap-x-4 px-4 sm:px-5">
 		<a
 			href={resolve('/')}

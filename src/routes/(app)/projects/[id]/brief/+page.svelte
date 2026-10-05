@@ -160,7 +160,7 @@
 				</p>
 			</div>
 
-			<div class="flex w-full flex-col gap-2 sm:w-auto sm:min-w-64">
+			<div class="flex w-full flex-col gap-2 sm:w-auto sm:min-w-64 print:hidden">
 				{#if briefs.length > 1}
 					<label class="text-sm text-band-muted" for="version">Brief version</label>
 					<select
@@ -328,7 +328,7 @@
 			</p>
 		{/if}
 
-		<div class="flex flex-wrap gap-3 border-t border-line pt-5">
+		<div class="flex flex-wrap gap-3 border-t border-line pt-5 print:hidden">
 			<button type="button" class="btn" disabled title="Coming later">Export PDF</button>
 			<button type="button" class="btn" disabled title="Coming later"
 				>Send to steering committee</button

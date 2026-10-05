@@ -11,6 +11,11 @@ services:
     volumes:
       - prism-data:/app/backend/data
     restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '5'
 
 volumes:
   prism-data:

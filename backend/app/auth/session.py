@@ -28,6 +28,38 @@ def set_session(response: Response, user_id: str) -> None:
     )
 
 
+_SSO_COOKIE = "prism_sso"
+_SSO_SALT = "prism.sso.v1"
+_SSO_MAX_AGE = 600
+
+
+def set_sso_pending(response: Response, data: dict) -> None:
+    """Remember state, nonce and PKCE verifier between SSO start and callback."""
+    serializer = URLSafeTimedSerializer(get_settings().secret_key, salt=_SSO_SALT)
+    response.set_cookie(
+        _SSO_COOKIE,
+        serializer.dumps(data),
+        max_age=_SSO_MAX_AGE,
+        httponly=True,
+        secure=get_settings().env == "prod",
+        samesite="lax",  # sent on the top-level redirect back from the identity provider
+        path="/api/auth/sso",
+    )
+
+
+def pop_sso_pending(request: Request, response: Response) -> dict | None:
+    response.delete_cookie(_SSO_COOKIE, path="/api/auth/sso")
+    token = request.cookies.get(_SSO_COOKIE)
+    if not token:
+        return None
+    serializer = URLSafeTimedSerializer(get_settings().secret_key, salt=_SSO_SALT)
+    try:
+        data = serializer.loads(token, max_age=_SSO_MAX_AGE)
+    except BadSignature:
+        return None
+    return data if isinstance(data, dict) else None
+
+
 def clear_session(response: Response) -> None:
     response.delete_cookie(COOKIE, path="/")
 

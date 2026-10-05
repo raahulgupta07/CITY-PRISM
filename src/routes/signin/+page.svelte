@@ -1,11 +1,26 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
+	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 	import { api, ROLE_LABELS, type AuthOptions, type User } from '$lib/api';
 
+	// Reasons the server gives when company sign-in fails (?error=...).
+	const SSO_ERRORS: Record<string, string> = {
+		cancelled: 'Sign-in was cancelled. Please try again.',
+		expired: 'Sign-in took too long or was started in another tab. Please try again.',
+		not_allowed: 'Please sign in with your City Holdings account.',
+		no_account: 'You do not have an account yet. Please contact the City AI team.',
+		no_email: 'Your company account has no email address. Please contact the City AI team.'
+	};
+	const ssoError = page.url.searchParams.get('error');
+
 	let options = $state<AuthOptions | null>(null);
-	let error = $state('');
+	let error = $state(
+		ssoError
+			? (SSO_ERRORS[ssoError] ?? 'Sign-in failed. Please try again or contact the City AI team.')
+			: ''
+	);
 	let busy = $state(false);
 
 	onMount(async () => {
@@ -62,6 +77,12 @@
 					{/each}
 				</ul>
 			</section>
+		{:else if options?.provider === 'oidc'}
+			<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- a server route, not a page -->
+			<a href="/api/auth/sso/start" data-sveltekit-reload class="btn-primary mt-8 w-full text-base"
+				>Sign in with your company account</a
+			>
+			<p class="mt-3 text-sm text-band-soft">Use your City Holdings email and password.</p>
 		{:else if options}
 			<p class="mt-8 bg-panel p-4 text-ink">
 				Company sign-in is not set up yet. Please contact the City AI team.

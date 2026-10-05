@@ -189,6 +189,21 @@ Done when
 2. Owners fill in their assessments; fix what they report.
 3. Prepare the steering committee pack from the briefs and the portfolio export.
 
+Ready in the code (runbook: [GO_LIVE.md](GO_LIVE.md)):
+
+- [x] Company sign-in (OpenID Connect, e.g. Entra ID), tested against a fake identity provider.
+- [x] Production image rebuilt and run with `ENV=prod`: health check, secure cookie, security headers, data kept after restart.
+- [x] Online backup command (`python -m app.backup`) and restore steps.
+- [x] `docker-compose.prod.yml`, AWS setup, go-live checks, update and rollback steps.
+- [x] Support guide for owners' reports, and steps for the steering committee pack (briefs print cleanly).
+
+Needs people and AWS access on the day:
+
+- [ ] Deploy to AWS ap-southeast-1 with HTTPS, and register the app with the identity provider.
+- [ ] Go-live checks in GO_LIVE.md section 3, including a test restore and a screen reader pass.
+- [ ] Owners fill in their assessments; fix what they report.
+- [ ] Make the steering committee pack.
+
 ---
 
 ## Rules for every phase

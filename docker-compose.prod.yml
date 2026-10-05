@@ -1,0 +1,23 @@
+# Production on one server: docker compose -f docker-compose.prod.yml up -d
+# Set PRISM_IMAGE to the image you pushed, e.g.
+#   <account>.dkr.ecr.ap-southeast-1.amazonaws.com/city-prism:2026-10-29
+# HTTPS ends at the load balancer in front of this server (see docs/GO_LIVE.md).
+services:
+  prism:
+    image: ${PRISM_IMAGE:?Set PRISM_IMAGE to the image tag to run}
+    container_name: city-prism
+    ports:
+      - '8080:8080'
+    env_file: .env
+    volumes:
+      - prism-data:/app/backend/data
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '5'
+
+volumes:
+  prism-data:
+    name: prism-data

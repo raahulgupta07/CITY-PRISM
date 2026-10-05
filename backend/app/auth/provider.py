@@ -1,4 +1,4 @@
-"""Sign-in providers. The company SSO plugs in here later (SPEC section 10)."""
+"""Sign-in providers (SPEC section 10)."""
 
 from __future__ import annotations
 
@@ -42,8 +42,20 @@ class DevSSOProvider:
         return db.scalar(select(User).where(User.email == email))
 
 
+class OidcProvider:
+    """Company sign-in. The browser goes to /api/auth/sso/start; see app/auth/oidc.py."""
+
+    name = "oidc"
+
+    def options(self, db: Session) -> dict:
+        return {"provider": self.name, "users": []}
+
+    def authenticate(self, db: Session, payload: dict) -> User | None:
+        return None  # only the SSO callback signs people in
+
+
 class NoProvider:
-    """Production until the company SSO is connected: nobody can sign in."""
+    """Production without OIDC settings: nobody can sign in."""
 
     name = "none"
 
@@ -55,6 +67,9 @@ class NoProvider:
 
 
 def get_provider() -> AuthProvider:
-    if get_settings().env == "prod":
+    settings = get_settings()
+    if settings.oidc_issuer:
+        return OidcProvider()
+    if settings.env == "prod":
         return NoProvider()
     return DevSSOProvider()
