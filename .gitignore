@@ -1,0 +1,14 @@
+node_modules/
+build/
+.svelte-kit/
+.env
+.env.*
+!.env.example
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.venv/
+backend/data/
+test-results/
+playwright-report/

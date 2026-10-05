@@ -1,0 +1,16 @@
+services:
+  prism:
+    build: .
+    image: city-prism:latest
+    container_name: city-prism
+    ports:
+      - '8080:8080'
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - prism-data:/app/backend/data
+    restart: unless-stopped
+
+volumes:
+  prism-data:

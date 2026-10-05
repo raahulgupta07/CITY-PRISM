@@ -1,0 +1,316 @@
+{
+	"about": "Scoring test cases from SPEC section 3.4, plus edge cases. backend/tests/test_scoring.py and src/lib/scoring.test.ts both run this file, so server and screen must agree.",
+	"dimension_cases": [
+		{
+			"name": "spec: Yes, Yes, Yes, Yes, No is capped at 3.0",
+			"answers": ["Yes", "Yes", "Yes", "Yes", "No"],
+			"raw": 4.2,
+			"score": 3.0,
+			"capped": true,
+			"has_no": true,
+			"answered": 5
+		},
+		{
+			"name": "spec: a single No",
+			"answers": ["No"],
+			"raw": 1.0,
+			"score": 1.0,
+			"capped": false,
+			"has_no": true,
+			"answered": 1
+		},
+		{
+			"name": "spec: Yes, Partly",
+			"answers": ["Yes", "Partly"],
+			"raw": 4.0,
+			"score": 4.0,
+			"capped": false,
+			"has_no": false,
+			"answered": 2
+		},
+		{
+			"name": "spec: Partly, Partly, Don't know",
+			"answers": ["Partly", "Partly", "Dont_know"],
+			"raw": 2.3,
+			"score": 2.3,
+			"capped": false,
+			"has_no": false,
+			"answered": 3
+		},
+		{
+			"name": "spec: no answers",
+			"answers": [],
+			"raw": null,
+			"score": null,
+			"capped": false,
+			"has_no": false,
+			"answered": 0
+		},
+		{
+			"name": "blank answers are left out",
+			"answers": ["Yes", null, null],
+			"raw": 5.0,
+			"score": 5.0,
+			"capped": false,
+			"has_no": false,
+			"answered": 1
+		},
+		{
+			"name": "only blanks",
+			"answers": [null, null, null, null, null],
+			"raw": null,
+			"score": null,
+			"capped": false,
+			"has_no": false,
+			"answered": 0
+		},
+		{
+			"name": "Don't know counts as 1 but does not cap",
+			"answers": ["Yes", "Yes", "Yes", "Yes", "Dont_know"],
+			"raw": 4.2,
+			"score": 4.2,
+			"capped": false,
+			"has_no": false,
+			"answered": 5
+		},
+		{
+			"name": "a No under 3.0 keeps its own score",
+			"answers": ["Partly", "No"],
+			"raw": 2.0,
+			"score": 2.0,
+			"capped": false,
+			"has_no": true,
+			"answered": 2
+		},
+		{
+			"name": "a No with an average of exactly 3.0",
+			"answers": ["Yes", "No"],
+			"raw": 3.0,
+			"score": 3.0,
+			"capped": false,
+			"has_no": true,
+			"answered": 2
+		},
+		{
+			"name": "four answers can give a half point",
+			"answers": ["Yes", "Yes", "Yes", "Partly"],
+			"raw": 4.5,
+			"score": 4.5,
+			"capped": false,
+			"has_no": false,
+			"answered": 4
+		},
+		{
+			"name": "thirds round to one decimal",
+			"answers": ["Yes", "Yes", "Partly"],
+			"raw": 4.3,
+			"score": 4.3,
+			"capped": false,
+			"has_no": false,
+			"answered": 3
+		}
+	],
+	"summary_cases": [
+		{
+			"name": "spec: 2.0, 2.0, 1.0, others null gives fix, weakest Data",
+			"dimension_scores": { "1": 2.0, "2": 2.0, "3": 1.0 },
+			"answered": 6,
+			"lowest": 1.0,
+			"weakest": [3],
+			"verdict": "fix",
+			"partial": true
+		},
+		{
+			"name": "spec: 3.0, 3.0, others null gives go, both weakest, partial",
+			"dimension_scores": { "1": 3.0, "2": 3.0 },
+			"answered": 4,
+			"lowest": 3.0,
+			"weakest": [1, 2],
+			"verdict": "go",
+			"partial": true
+		},
+		{
+			"name": "spec: 4.0, 4.0, others null gives ready (partial)",
+			"dimension_scores": { "1": 4.0, "2": 4.0 },
+			"answered": 4,
+			"lowest": 4.0,
+			"weakest": [1, 2],
+			"verdict": "ready",
+			"partial": true
+		},
+		{
+			"name": "spec: all null gives not assessed",
+			"dimension_scores": {},
+			"answered": 0,
+			"lowest": null,
+			"weakest": [],
+			"verdict": "not_assessed",
+			"partial": true
+		},
+		{
+			"name": "boundary: 2.4 is fix",
+			"dimension_scores": { "4": 2.4, "5": 4.0 },
+			"answered": 10,
+			"lowest": 2.4,
+			"weakest": [4],
+			"verdict": "fix",
+			"partial": true
+		},
+		{
+			"name": "boundary: 2.5 is go",
+			"dimension_scores": { "4": 2.5 },
+			"answered": 4,
+			"lowest": 2.5,
+			"weakest": [4],
+			"verdict": "go",
+			"partial": true
+		},
+		{
+			"name": "boundary: 3.4 is go",
+			"dimension_scores": { "6": 3.4, "7": 5.0 },
+			"answered": 10,
+			"lowest": 3.4,
+			"weakest": [6],
+			"verdict": "go",
+			"partial": true
+		},
+		{
+			"name": "boundary: 3.5 is ready",
+			"dimension_scores": { "6": 3.5 },
+			"answered": 4,
+			"lowest": 3.5,
+			"weakest": [6],
+			"verdict": "ready",
+			"partial": true
+		},
+		{
+			"name": "all 40 answered is not partial",
+			"dimension_scores": {
+				"1": 5.0,
+				"2": 5.0,
+				"3": 5.0,
+				"4": 5.0,
+				"5": 5.0,
+				"6": 5.0,
+				"7": 5.0,
+				"8": 4.6
+			},
+			"answered": 40,
+			"lowest": 4.6,
+			"weakest": [8],
+			"verdict": "ready",
+			"partial": false
+		}
+	],
+	"project_cases": [
+		{
+			"name": "seed: Employee Assistant",
+			"answers": {
+				"2.1": "Yes",
+				"2.2": "No",
+				"2.3": "Yes",
+				"2.4": "Yes",
+				"2.5": "Yes",
+				"5.1": "No",
+				"5.2": "Yes",
+				"5.3": "Yes"
+			},
+			"dimension_scores": {
+				"1": null,
+				"2": 3.0,
+				"3": null,
+				"4": null,
+				"5": 3.0,
+				"6": null,
+				"7": null,
+				"8": null
+			},
+			"lowest": 3.0,
+			"weakest": [2, 5],
+			"verdict": "go",
+			"answered": 8,
+			"coverage": 0.2,
+			"partial": true
+		},
+		{
+			"name": "seed: CFC Model",
+			"answers": { "1.1": "Partly", "3.2": "No" },
+			"dimension_scores": {
+				"1": 3.0,
+				"2": null,
+				"3": 1.0,
+				"4": null,
+				"5": null,
+				"6": null,
+				"7": null,
+				"8": null
+			},
+			"lowest": 1.0,
+			"weakest": [3],
+			"verdict": "fix",
+			"answered": 2,
+			"coverage": 0.05,
+			"partial": true
+		},
+		{
+			"name": "seed: Consumer Insights",
+			"answers": { "5.2": "Yes", "7.3": "Yes" },
+			"dimension_scores": {
+				"1": null,
+				"2": null,
+				"3": null,
+				"4": null,
+				"5": 5.0,
+				"6": null,
+				"7": 5.0,
+				"8": null
+			},
+			"lowest": 5.0,
+			"weakest": [5, 7],
+			"verdict": "ready",
+			"answered": 2,
+			"coverage": 0.05,
+			"partial": true
+		},
+		{
+			"name": "no answers",
+			"answers": {},
+			"dimension_scores": {
+				"1": null,
+				"2": null,
+				"3": null,
+				"4": null,
+				"5": null,
+				"6": null,
+				"7": null,
+				"8": null
+			},
+			"lowest": null,
+			"weakest": [],
+			"verdict": "not_assessed",
+			"answered": 0,
+			"coverage": 0.0,
+			"partial": true
+		},
+		{
+			"name": "blank answers and unknown question IDs are left out",
+			"answers": { "1.1": "Yes", "1.2": null, "9.1": "No", "x": "No" },
+			"dimension_scores": {
+				"1": 5.0,
+				"2": null,
+				"3": null,
+				"4": null,
+				"5": null,
+				"6": null,
+				"7": null,
+				"8": null
+			},
+			"lowest": 5.0,
+			"weakest": [1],
+			"verdict": "ready",
+			"answered": 1,
+			"coverage": 0.025,
+			"partial": true
+		}
+	]
+}

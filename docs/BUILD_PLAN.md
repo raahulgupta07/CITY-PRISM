@@ -10,7 +10,7 @@ We stop for review at the end of every phase.
 
 | Layer | Choice |
 |---|---|
-| Screens | SvelteKit 2 + Svelte 5 + TypeScript, `adapter-static` (single-page app, fallback `index.html`), Tailwind 4, bits-ui |
+| Screens | SvelteKit 2 (not 3.0, released 1 Oct 2026) + Svelte 5 + TypeScript, `adapter-static` (single-page app, fallback `index.html`), Tailwind 4, bits-ui |
 | Server | Python 3.11, FastAPI, Uvicorn, Pydantic v2 |
 | Database | SQLite in `/app/backend/data/prism.db` (WAL mode), SQLAlchemy 2, Alembic. `DATABASE_URL` switches to PostgreSQL |
 | AI | OpenRouter through the server only (httpx). `OPENROUTER_API_KEY`, `LLM_MODEL_FAST`, `LLM_MODEL_DEFAULT`, `OPENROUTER_BASE_URL` |
@@ -33,9 +33,10 @@ city-prism/
 │  │  ├─ auth/                AuthProvider interface, DevSSO stub, sessions
 │  │  ├─ routers/             one file per area
 │  │  ├─ llm/                 client.py, prompts.py, schemas.py, log.py
-│  │  └─ services/            permissions, history, extract_text, export
+│  │  ├─ services/            permissions, history, extract_text, export
+│  │  ├─ framework.py         the 8 dimensions and 40 questions (seed source)
+│  │  └─ seed.py              python -m app.seed
 │  ├─ alembic/                migrations
-│  ├─ seed.py
 │  └─ tests/
 ├─ src/                       SvelteKit app
 │  ├─ lib/scoring.ts          mirror of scoring.py for instant feedback
@@ -81,10 +82,10 @@ Tasks
 10. Dockerfile (two stages), `docker-compose.yml` with a named volume, `.env.example`.
 
 Done when
-- [ ] `docker compose up` serves the app on port 8080 and survives a restart with data kept.
-- [ ] pytest and Vitest both pass every §3.4 case from the one JSON file.
-- [ ] Seed gives the expected verdicts: CFC Model and Fresh Replenishment = Fix; 6 = Go; Consumer Insights = Ready (partial); 3 = Not assessed.
-- [ ] Unit tests for permissions (owner of own project, reviewer all, approver read-only, admin all).
+- [x] `docker compose up` serves the app on port 8080 and survives a restart with data kept.
+- [x] pytest and Vitest both pass every §3.4 case from the one JSON file.
+- [x] Seed gives the expected verdicts: CFC Model and Fresh Replenishment = Fix; 6 = Go; Consumer Insights = Ready (partial); 3 = Not assessed.
+- [x] Unit tests for permissions (owner of own project, reviewer all, approver read-only, admin all).
 
 ---
 

@@ -1,0 +1,36 @@
+@import 'tailwindcss';
+
+/* Design tokens from the B + C mix. Dark mode comes in phase 5. */
+@theme {
+	--font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+	--font-condensed: 'IBM Plex Sans Condensed', 'IBM Plex Sans', sans-serif;
+	--font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+	--color-navy: #0a1424;
+	--color-canvas: #eef0f2;
+	--color-panel: #ffffff;
+	--color-ink: #0d1520;
+	--color-muted: #39424f;
+	--color-line: #b9c1cc;
+	--color-teal: #006f66;
+	--color-teal-dark: #004d47;
+	--color-teal-on-dark: #5fe0d0;
+	--color-weak: #b3261e;
+	--color-partial: #e9b44c;
+	--color-strong: #2e8b57;
+	--color-ai-bg: #f1eefa;
+	--color-ai-ink: #3e2a86;
+
+	--radius-*: initial;
+}
+
+html {
+	background: var(--color-canvas);
+	color: var(--color-ink);
+	font-family: var(--font-sans);
+}
+
+:focus-visible {
+	outline: 2px solid var(--color-teal);
+	outline-offset: 2px;
+}
