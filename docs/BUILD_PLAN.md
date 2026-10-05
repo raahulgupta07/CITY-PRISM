@@ -177,7 +177,9 @@ Done when
 5. Playwright tests for the main path: sign in → new project → answer → interview → evidence → brief → approve → export.
 6. README: run locally, environment variables, backup (copy the data folder), switch to PostgreSQL, plug in the real SSO.
 
-Done when: every item in SPEC §13 is ticked.
+Done when
+- [x] Every item in SPEC §13 is ticked.
+- [x] Browser tests pass at desktop and phone width (`npm run test:e2e`), including automated accessibility checks in both themes.
 
 ---
 

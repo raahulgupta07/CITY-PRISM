@@ -5,6 +5,25 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<link rel="icon" href="%sveltekit.assets%/favicon.svg" />
 		<title>City Prism</title>
+		<script>
+			// Set the theme before the page draws, so dark mode does not flash white.
+			// Keep the key in step with src/lib/theme.svelte.ts.
+			(function () {
+				var media = matchMedia('(prefers-color-scheme: dark)');
+				function apply() {
+					var choice = null;
+					try {
+						choice = localStorage.getItem('prism-theme');
+					} catch (e) {
+						// Storage can be blocked; follow the system.
+					}
+					if (choice !== 'light' && choice !== 'dark') choice = media.matches ? 'dark' : 'light';
+					document.documentElement.dataset.theme = choice;
+				}
+				apply();
+				media.addEventListener('change', apply);
+			})();
+		</script>
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">

@@ -97,12 +97,12 @@
 			novalidate
 		>
 			{#if error}
-				<p role="alert" class="border-l-4 border-weak bg-[#FBEAEA] p-3">{error}</p>
+				<p role="alert" class="border-l-4 border-weak bg-error-bg p-3">{error}</p>
 			{/if}
 
 			<div>
 				<label class="label" for="name"
-					>Project name <span class="text-weak">(required)</span></label
+					>Project name <span class="text-danger">(required)</span></label
 				>
 				<input
 					id="name"
@@ -113,7 +113,7 @@
 					aria-invalid={nameError ? 'true' : undefined}
 					aria-describedby={nameError ? 'name-error' : undefined}
 				/>
-				{#if nameError}<p id="name-error" class="mt-1 text-sm text-weak">{nameError}</p>{/if}
+				{#if nameError}<p id="name-error" class="mt-1 text-sm text-danger">{nameError}</p>{/if}
 			</div>
 
 			<div class="grid gap-5 sm:grid-cols-2">

@@ -58,7 +58,7 @@
 		context = '';
 		if (!q) {
 			running = false;
-			push({ kind: 'note', text: 'Every question has an answer or was skipped. Well done.' });
+			push({ kind: 'note', text: 'Every question is answered or skipped.' });
 			return;
 		}
 		onfocus(q.id);
@@ -184,7 +184,7 @@
 							{#if i === lastRecorded}
 								<button
 									type="button"
-									class="min-h-9 border border-ai-ink bg-white px-3 text-sm font-semibold"
+									class="min-h-11 border border-ai-ink bg-panel px-3 text-sm font-semibold"
 									disabled={busy}
 									onclick={() => undo(i)}>Undo</button
 								>
@@ -193,7 +193,7 @@
 						<p class="mt-1 text-sm">{entry.text}</p>
 					</div>
 				{:else}
-					<p class="text-sm {entry.error ? 'text-weak' : 'text-muted'}">{entry.text}</p>
+					<p class="text-sm {entry.error ? 'text-danger' : 'text-muted'}">{entry.text}</p>
 				{/if}
 			</li>
 		{/each}
@@ -209,8 +209,10 @@
 				onkeydown={keydown}
 				maxlength="2000"
 				rows="3"
+				aria-describedby="interview-hint"
 				class="field mt-1 w-full resize-y"
 				disabled={busy}></textarea>
+			<p id="interview-hint" class="mt-1 text-xs text-muted">Ctrl+Enter also sends.</p>
 			<div class="mt-2 flex flex-wrap gap-2">
 				<button type="button" class="btn" onclick={skip} disabled={busy}>Skip</button>
 				<button type="button" class="btn" onclick={stop} disabled={busy}>Stop</button>
@@ -218,7 +220,7 @@
 					type="button"
 					class="btn-primary ml-auto"
 					onclick={send}
-					disabled={busy || !reply.trim()}>{busy ? 'Thinking…' : 'Send · Ctrl+Enter'}</button
+					disabled={busy || !reply.trim()}>{busy ? 'Thinking…' : 'Send'}</button
 				>
 			</div>
 		{:else}

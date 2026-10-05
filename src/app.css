@@ -1,27 +1,85 @@
 @import 'tailwindcss';
 
-/* Design tokens from the B + C mix. Dark mode comes in phase 5. */
-@theme {
+/* Design tokens from the B + C mix. `static` keeps every token in the CSS,
+   because some are only used from scripts. Dark values are below. */
+@theme static {
 	--font-sans: 'IBM Plex Sans', system-ui, sans-serif;
 	--font-condensed: 'IBM Plex Sans Condensed', 'IBM Plex Sans', sans-serif;
 	--font-mono: 'IBM Plex Mono', ui-monospace, monospace;
 
-	--color-navy: #0a1424;
+	/* Page surfaces and text */
 	--color-canvas: #eef0f2;
 	--color-panel: #ffffff;
+	--color-subtle: #f7f8f9;
+	--color-field: #ffffff;
 	--color-ink: #0d1520;
 	--color-muted: #39424f;
 	--color-line: #b9c1cc;
+	--color-divider: #e1e5ea;
+	--color-track: #dce0e5;
 	--color-teal: #006f66;
 	--color-teal-dark: #004d47;
-	--color-teal-on-dark: #5fe0d0;
-	--color-weak: #b3261e;
-	--color-partial: #e9b44c;
-	--color-strong: #2e8b57;
+	--color-on-teal: #ffffff;
+	--color-danger: #b3261e;
+	--color-error-bg: #fbeaea;
+	--color-warn-bg: #fff6e0;
 	--color-ai-bg: #f1eefa;
 	--color-ai-ink: #3e2a86;
 
+	/* Score and verdict fills. White text sits on weak and strong. */
+	--color-weak: #b3261e;
+	--color-partial: #e9b44c;
+	--color-on-partial: #2b1c00;
+	--color-strong: #1f7a4c;
+	--color-go: #c77c00;
+	--color-unknown: #4a5465;
+	--color-hollow: #7a8494;
+	--color-none-bg: #f4f5f7;
+	--color-none-ink: #5d6674;
+
+	/* The dark band at the top of each screen. It stays dark in both themes. */
+	--color-navy: #0a1424;
+	--color-band-edge: #1c2a40;
+	--color-band-line: #2a3a52;
+	--color-band-raised: #15233a;
+	--color-band-hover: #111d30;
+	--color-band-ink: #e6ecf2;
+	--color-band-soft: #c9d2dc;
+	--color-band-muted: #aeb9c6;
+	--color-teal-on-dark: #5fe0d0;
+	--color-weak-on-dark: #ff7a6b;
+	--color-partial-on-dark: #f5b84a;
+	--color-strong-on-dark: #5fd39a;
+	--color-strong-on-dark-hover: #7fe3b2;
+
 	--radius-*: initial;
+}
+
+/* Set on <html> by the script in app.html, from the person's choice or the system. */
+:root[data-theme='dark'] {
+	color-scheme: dark;
+	--color-canvas: #0c131c;
+	--color-panel: #141d28;
+	--color-subtle: #101822;
+	--color-field: #0f1720;
+	--color-ink: #e4e9ef;
+	--color-muted: #a5afbc;
+	--color-line: #3a4757;
+	--color-divider: #253140;
+	--color-track: #2a3644;
+	--color-teal: #4fd1c1;
+	--color-teal-dark: #7fe0d4;
+	--color-on-teal: #04201d;
+	--color-danger: #ff8a7e;
+	--color-error-bg: #3b1916;
+	--color-warn-bg: #33280e;
+	--color-ai-bg: #211b3b;
+	--color-ai-ink: #cdc1ff;
+	--color-none-bg: #1b2531;
+	--color-none-ink: #97a2b0;
+	--color-hollow: #8b96a5;
+	--color-navy: #070d17;
+	--color-band-edge: #1f2c3f;
 }
 
 html {
@@ -33,6 +91,11 @@ html {
 :focus-visible {
 	outline: 2px solid var(--color-teal);
 	outline-offset: 2px;
+}
+
+/* Teal on navy is too dark to see, so the band uses the light teal. */
+.band :focus-visible {
+	outline-color: var(--color-teal-on-dark);
 }
 
 @layer components {
@@ -51,14 +114,14 @@ html {
 	}
 	.btn-primary {
 		background: var(--color-teal);
-		color: #fff;
+		color: var(--color-on-teal);
 	}
 	.btn-primary:hover {
 		background: var(--color-teal-dark);
 	}
 	.btn {
 		border: 1px solid var(--color-line);
-		background: #fff;
+		background: var(--color-panel);
 		color: var(--color-ink);
 		font-weight: 500;
 	}
@@ -73,7 +136,7 @@ html {
 	.field {
 		min-height: 2.75rem;
 		border: 1px solid var(--color-line);
-		background: #fff;
+		background: var(--color-field);
 		padding: 0.5rem 0.625rem;
 		font: inherit;
 		color: var(--color-ink);

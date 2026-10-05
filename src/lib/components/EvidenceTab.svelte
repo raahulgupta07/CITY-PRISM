@@ -106,8 +106,8 @@
 	}
 
 	const PILL = {
-		Yes: 'bg-[#1F7A4C] text-white',
-		Partly: 'bg-partial text-[#2B1C00]',
+		Yes: 'bg-strong text-white',
+		Partly: 'bg-partial text-on-partial',
 		No: 'bg-weak text-white'
 	};
 </script>
@@ -129,7 +129,7 @@
 		accept=".txt,.md,.csv,.docx,.pdf"
 		bind:files
 		disabled={busy}
-		class="block w-full text-sm file:mr-3 file:min-h-11 file:border file:border-line file:bg-white file:px-3 file:text-sm"
+		class="block w-full text-sm file:mr-3 file:min-h-11 file:border file:border-line file:bg-panel file:px-3 file:text-sm"
 	/>
 	<p class="mt-1 text-xs text-muted">
 		txt, md, csv, docx or pdf, up to 10 MB. We keep the text in our database. The AI reads at most
@@ -141,7 +141,7 @@
 	</button>
 
 	<div aria-live="polite">
-		{#if error}<p role="alert" class="mt-3 text-sm text-weak">{error}</p>{/if}
+		{#if error}<p role="alert" class="mt-3 text-sm text-danger">{error}</p>{/if}
 		{#if message}<p class="mt-3 text-sm">{message}</p>{/if}
 	</div>
 
@@ -151,15 +151,15 @@
 				<h3 id="suggestions-title" class="font-semibold">
 					Suggested answers <span class="font-normal text-muted">({suggestions.length})</span>
 				</h3>
-				<button type="button" class="btn min-h-9" onclick={acceptAll}>Accept all</button>
+				<button type="button" class="btn min-h-11" onclick={acceptAll}>Accept all</button>
 			</div>
-			<ul class="divide-y divide-[#E1E5EA]">
+			<ul class="divide-y divide-divider">
 				{#each suggestions as s (s.id)}
 					<li class="py-3">
 						<p class="text-sm">
 							<button
 								type="button"
-								class="font-mono font-semibold text-teal underline-offset-4 hover:underline"
+								class="inline-flex min-h-11 items-center font-mono font-semibold text-teal underline-offset-4 hover:underline"
 								onclick={() => onfocus(s.question_id)}>{s.question_id}</button
 							>
 							{questionText[s.question_id] ?? ''}
@@ -174,10 +174,10 @@
 							AI SUGGESTED · from {s.source_excerpt}
 						</p>
 						<div class="mt-2 flex gap-2">
-							<button type="button" class="btn min-h-9" onclick={() => decide(s, 'accept')}
+							<button type="button" class="btn min-h-11" onclick={() => decide(s, 'accept')}
 								>Accept</button
 							>
-							<button type="button" class="btn min-h-9" onclick={() => decide(s, 'dismiss')}
+							<button type="button" class="btn min-h-11" onclick={() => decide(s, 'dismiss')}
 								>Dismiss</button
 							>
 						</div>

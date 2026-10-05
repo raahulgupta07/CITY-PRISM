@@ -25,7 +25,7 @@
 			{questionId ? `Changes to ${questionId}` : 'Changes'}
 		</h2>
 		{#if questionId}
-			<button type="button" class="min-h-9 text-sm text-teal underline" onclick={onclear}
+			<button type="button" class="min-h-11 text-sm text-teal underline" onclick={onclear}
 				>Show all</button
 			>
 		{/if}
@@ -33,7 +33,7 @@
 	{#if shown.length === 0}
 		<p class="p-4 text-sm text-muted">No changes yet.</p>
 	{:else}
-		<ol class="divide-y divide-[#E1E5EA] overflow-y-auto">
+		<ol class="divide-y divide-divider overflow-y-auto">
 			{#each shown as h (h.id)}
 				<li class="px-4 py-3 text-sm">
 					<p>

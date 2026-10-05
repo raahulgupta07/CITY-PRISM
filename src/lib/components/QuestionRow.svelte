@@ -82,7 +82,7 @@
 			{#if canEdit}
 				<button
 					type="button"
-					class="min-h-9 border border-ai-ink bg-white px-3 text-sm font-semibold text-ai-ink"
+					class="min-h-11 border border-ai-ink bg-panel px-3 text-sm font-semibold text-ai-ink"
 					onclick={onconfirm}>Confirm</button
 				>
 			{/if}
@@ -107,7 +107,7 @@
 			<p class="mt-1 text-[15px]">{row.evidence}</p>
 		{/if}
 		<div
-			class="mt-2 flex flex-wrap items-center justify-between gap-2 border-t border-[#E1E5EA] pt-2 text-sm text-muted"
+			class="mt-2 flex flex-wrap items-center justify-between gap-2 border-t border-divider pt-2 text-sm text-muted"
 		>
 			<span>
 				{#if row?.updated_by}
@@ -115,13 +115,13 @@
 				{:else}
 					Not answered
 				{/if}
-				<span aria-live="polite" class="ml-2 {status.startsWith('Could') ? 'text-weak' : ''}"
+				<span aria-live="polite" class="ml-2 {status.startsWith('Could') ? 'text-danger' : ''}"
 					>{status}</span
 				>
 			</span>
 			<button
 				type="button"
-				class="min-h-9 text-teal underline underline-offset-4"
+				class="min-h-11 text-teal underline underline-offset-4"
 				onclick={onhistory}>History</button
 			>
 		</div>

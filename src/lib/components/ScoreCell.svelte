@@ -6,9 +6,9 @@
 
 	const STYLE = {
 		weak: 'bg-weak text-white',
-		partial: 'bg-partial text-[#2B1C00]',
+		partial: 'bg-partial text-on-partial',
 		strong: 'bg-strong text-white',
-		none: 'bg-[#F4F5F7] text-[#6B7482]'
+		none: 'bg-none-bg text-none-ink'
 	};
 	const label = $derived(
 		`${DIM_SHORT[dim.id]}: ${dim.score === null ? 'not answered' : formatScore(dim.score)}` +

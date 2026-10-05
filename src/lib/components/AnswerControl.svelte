@@ -16,22 +16,22 @@
 	} = $props();
 
 	const ON: Record<AnswerValue, string> = {
-		Yes: 'bg-[#1F7A4C] text-white',
-		Partly: 'bg-partial text-[#2B1C00]',
+		Yes: 'bg-strong text-white',
+		Partly: 'bg-partial text-on-partial',
 		No: 'bg-weak text-white',
-		Dont_know: 'bg-[#4A5465] text-white'
+		Dont_know: 'bg-unknown text-white'
 	};
 </script>
 
 <!-- Click the selected answer again to clear it. -->
-<div role="group" aria-label={label} class="inline-flex border border-line bg-white">
+<div role="group" aria-label={label} class="inline-flex border border-line bg-panel">
 	{#each ANSWER_VALUES as v, i (v)}
 		{@const on = value === v}
 		<button
 			type="button"
 			aria-pressed={on}
 			{disabled}
-			title={on && !disabled ? 'Click again to clear' : undefined}
+			title={on && !disabled ? 'Select again to clear' : undefined}
 			class="min-h-11 px-3 text-[13px] whitespace-nowrap sm:px-3.5 {i
 				? 'border-l border-line'
 				: ''} {on

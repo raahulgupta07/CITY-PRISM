@@ -370,11 +370,11 @@ Default project owner: Rahul Gupta (rahulgupta@cityholdings.com.mm) until each o
 
 ## 13. Definition of done (MVP)
 
-- [ ] All 40 questions load from the DB; dimensions 1–2 show "Draft wording".
-- [ ] Scoring passes every test in 3.4, on server and client.
-- [ ] An owner can create a project, answer by hand, by interview, and from pasted evidence.
-- [ ] AI answers are tagged until confirmed; every change is in history with Undo for the last agent answer.
-- [ ] Decision brief shows the rules verdict, AI summary, 3 actions, risks; approvers can approve.
-- [ ] Portfolio shows all 12 seed projects with correct scores and verdicts.
-- [ ] CSV and XLSX export work.
-- [ ] Works on phone width and in dark mode.
+- [x] All 40 questions load from the DB; dimensions 1–2 show "Draft wording".
+- [x] Scoring passes every test in 3.4, on server and client.
+- [x] An owner can create a project, answer by hand, by interview, and from pasted evidence.
+- [x] AI answers are tagged until confirmed; every change is in history with Undo for the last agent answer.
+- [x] Decision brief shows the rules verdict, AI summary, 3 actions, risks; approvers can approve.
+- [x] Portfolio shows all 12 seed projects with correct scores and verdicts.
+- [x] CSV and XLSX export work.
+- [x] Works on phone width and in dark mode.

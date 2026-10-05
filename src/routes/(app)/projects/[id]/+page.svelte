@@ -15,6 +15,7 @@
 		type Score,
 		type Stage
 	} from '$lib/api';
+	import { BAND_ON_DARK as DARK, faded } from '$lib/colours';
 	import EvidenceTab from '$lib/components/EvidenceTab.svelte';
 	import HistoryPanel from '$lib/components/HistoryPanel.svelte';
 	import InterviewTab from '$lib/components/InterviewTab.svelte';
@@ -22,6 +23,7 @@
 	import VerdictMark from '$lib/components/VerdictMark.svelte';
 	import { scoreProject } from '$lib/scoring';
 	import { session } from '$lib/session.svelte';
+	import { tabKeys } from '$lib/tabs';
 	import { DIM_SHORT, formatDate, formatScore, projectSentence } from '$lib/text';
 
 	const id = $derived(page.params.id ?? '');
@@ -172,28 +174,37 @@
 		patch({ archived }, archived ? 'Project archived.' : 'Project restored.');
 	}
 
+	// On phones the tabs scroll sideways; keep the current one in view.
+	// Only the tab row scrolls, never the page.
+	$effect(() => {
+		const tab = document.getElementById(`tab-${current}`);
+		const row = tab?.parentElement;
+		if (!tab || !row || row.scrollWidth <= row.clientWidth) return;
+		row.scrollTo({ left: tab.offsetLeft - (row.clientWidth - tab.offsetWidth) / 2 });
+	});
+
 	// Arrow keys move between dimension tabs.
 	function tabKey(e: KeyboardEvent) {
-		const ids = dims.map((d) => d.id);
-		const i = ids.indexOf(current);
-		let next = -1;
-		if (e.key === 'ArrowRight') next = ids[(i + 1) % ids.length];
-		if (e.key === 'ArrowLeft') next = ids[(i - 1 + ids.length) % ids.length];
-		if (e.key === 'Home') next = ids[0];
-		if (e.key === 'End') next = ids[ids.length - 1];
-		if (next > 0) {
-			e.preventDefault();
-			current = next;
-			document.getElementById(`tab-${next}`)?.focus();
-		}
+		tabKeys(
+			e,
+			dims.map((d) => d.id),
+			current,
+			(k) => (current = k),
+			'tab-'
+		);
 	}
 
-	const DARK = { weak: '#FF7A6B', partial: '#F5B84A', strong: '#5FD39A', none: '#2A3A52' };
+	const AGENT_TABS = [
+		['interview', 'Interview'],
+		['evidence', 'Read evidence'],
+		['changes', 'Changes']
+	] as const;
+
 	const BAND_BOX = {
 		weak: 'bg-weak text-white',
-		partial: 'bg-partial text-[#2B1C00]',
+		partial: 'bg-partial text-on-partial',
 		strong: 'bg-strong text-white',
-		none: 'bg-canvas text-muted'
+		none: 'bg-none-bg text-none-ink'
 	};
 </script>
 
@@ -208,14 +219,15 @@
 	<p class="p-6 text-muted">Loading project…</p>
 {:else}
 	<!-- Dark band: project facts, rules sentence, dimension bars as tabs -->
-	<section class="bg-navy px-4 pt-5 text-[#E6ECF2] sm:px-7">
-		<nav aria-label="Breadcrumb" class="text-sm text-[#AEB9C6]">
-			<a href={resolve('/')} class="text-[#AEB9C6] underline-offset-4 hover:underline">Portfolio</a>
+	<section class="band bg-navy px-4 pt-5 text-band-ink sm:px-7">
+		<nav aria-label="Breadcrumb" class="text-sm text-band-muted">
+			<a href={resolve('/')} class="text-band-muted underline-offset-4 hover:underline">Portfolio</a
+			>
 			/ <span class="text-white">{project.name}</span>
 		</nav>
 		<div class="mt-3 flex flex-wrap items-start justify-between gap-6">
 			<div class="max-w-3xl">
-				<p class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-[#AEB9C6]">
+				<p class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-band-muted">
 					<span>{project.business_unit || 'No business unit'}</span>
 					{#if project.sponsor}<span>Sponsor: {project.sponsor}</span>{/if}
 					<span>Owner: {project.owner?.name ?? 'Not set'}</span>
@@ -225,7 +237,7 @@
 						Stage
 						{#if canEdit}
 							<select
-								class="min-h-9 border border-[#2A3A52] bg-[#15233A] px-2 text-white"
+								class="min-h-11 border border-band-line bg-band-raised px-2 text-white"
 								value={project.stage}
 								onchange={(e) => patch({ stage: e.currentTarget.value as Stage }, 'Stage saved.')}
 							>
@@ -239,13 +251,13 @@
 				<h1 class="mt-3 font-condensed text-3xl font-medium text-white sm:text-4xl">
 					{project.name}
 				</h1>
-				<p class="mt-2 text-[17px] text-[#C9D2DC]" aria-live="polite">{projectSentence(score)}</p>
+				<p class="mt-2 text-[17px] text-band-soft" aria-live="polite">{projectSentence(score)}</p>
 			</div>
 			<div class="w-full max-w-60">
-				<p class="flex justify-between text-sm text-[#AEB9C6]">
+				<p class="flex justify-between text-sm text-band-muted">
 					Answered <span class="font-mono text-white">{score.answered}/40</span>
 				</p>
-				<div class="mt-1 h-1 bg-[#2A3A52]">
+				<div class="mt-1 h-1 bg-band-line">
 					<div class="h-1 bg-teal-on-dark" style:width="{score.coverage * 100}%"></div>
 				</div>
 				<p class="mt-3 text-sm"><VerdictMark {score} dark /></p>
@@ -255,7 +267,7 @@
 				{#if canArchive}
 					<button
 						type="button"
-						class="mt-3 min-h-9 text-sm text-teal-on-dark underline underline-offset-4"
+						class="mt-3 min-h-11 text-sm text-teal-on-dark underline underline-offset-4"
 						onclick={() => setArchived(!project?.archived)}
 						>{project.archived ? 'Restore project' : 'Archive project'}</button
 					>
@@ -267,7 +279,7 @@
 			role="tablist"
 			aria-label="Dimensions"
 			tabindex="-1"
-			class="mt-5 grid grid-cols-4 sm:grid-cols-8"
+			class="relative -mx-4 mt-5 flex gap-1 overflow-x-auto px-4 pb-3 sm:mx-0 sm:grid sm:grid-cols-8 sm:gap-0 sm:overflow-visible sm:px-0 sm:pb-0"
 			onkeydown={tabKey}
 		>
 			{#each score.dimensions as d (d.id)}
@@ -280,26 +292,35 @@
 					aria-selected={on}
 					aria-controls="dimension-panel"
 					tabindex={on ? 0 : -1}
-					class="flex min-h-11 flex-col justify-end gap-1.5 px-2.5 pt-2 pb-3 text-left {on
-						? 'bg-[#15233A] shadow-[inset_0_-3px_0_var(--color-teal-on-dark)]'
-						: 'hover:bg-[#111D30]'}"
+					class="flex min-h-11 shrink-0 flex-col justify-end gap-1 border px-3 py-2 text-left sm:gap-1.5 sm:border-0 sm:px-2.5 sm:pt-2 sm:pb-3 {on
+						? 'border-teal-on-dark bg-band-raised sm:shadow-[inset_0_-3px_0_var(--color-teal-on-dark)]'
+						: 'border-band-line hover:bg-band-hover'}"
 					onclick={() => (current = d.id)}
 				>
-					<span class="flex h-11 items-end">
+					<!-- Bars from small tablets up; on phones each tab is a chip. -->
+					<span class="hidden h-11 items-end sm:flex">
 						<span
 							class="block w-full"
 							style:height={d.score === null ? '2px' : `${Math.round((d.score / 5) * 44)}px`}
-							style:background={d.score === null || weak ? DARK[d.band] : `${DARK[d.band]}80`}
-							style:box-shadow={weak ? `0 0 0 2px #0A1424, 0 0 0 3px ${DARK[d.band]}` : ''}
+							style:background={d.score === null || weak ? DARK[d.band] : faded(DARK[d.band])}
+							style:box-shadow={weak
+								? `0 0 0 2px var(--color-navy), 0 0 0 3px ${DARK[d.band]}`
+								: ''}
 						></span>
 					</span>
-					<span class="flex items-baseline gap-2">
+					<span class="flex items-center gap-2 sm:items-baseline">
+						<span
+							aria-hidden="true"
+							class="size-2.5 shrink-0 sm:hidden"
+							style:background={DARK[d.band]}
+						></span>
 						<span class="font-mono text-base text-white">{formatScore(d.score)}</span>
-						<span class="font-mono text-[11px] text-[#AEB9C6]">{d.answered}/5</span>
+						<span class="font-mono text-[11px] text-band-muted">{d.answered}/5</span>
 					</span>
-					<span class="text-xs text-[#C9D2DC]"
+					<span class="text-xs whitespace-nowrap text-band-soft"
 						>{d.id}
-						{DIM_SHORT[d.id]}{#if d.has_no}<span class="sr-only">, has a No</span>{/if}</span
+						{DIM_SHORT[d.id]}{#if d.has_no}<span class="sr-only">, has a No</span
+							>{/if}{#if weak}<span class="sr-only">, weakest link</span>{/if}</span
 					>
 				</button>
 			{/each}
@@ -310,7 +331,7 @@
 		<p role="status" class="border-b border-line bg-panel px-4 py-2 text-sm sm:px-7">{notice}</p>
 	{/if}
 	{#if project.archived}
-		<p class="border-b border-line bg-[#FFF6E0] px-4 py-2 text-sm sm:px-7">
+		<p class="border-b border-line bg-warn-bg px-4 py-2 text-sm sm:px-7">
 			This project is archived. Its answers are kept but cannot be changed.
 		</p>
 	{:else if !project.can_edit}
@@ -399,17 +420,31 @@
 			class="flex flex-col border-t border-line bg-panel lg:sticky lg:top-0 lg:h-screen lg:border-t-0 lg:border-l"
 			aria-label="Agent"
 		>
-			<div role="tablist" aria-label="Agent" class="grid shrink-0 grid-cols-3 border-b border-line">
-				{#each [['interview', 'Interview'], ['evidence', 'Read evidence'], ['changes', 'Changes']] as const as [key, label] (key)}
+			<div
+				role="tablist"
+				aria-label="Agent"
+				tabindex="-1"
+				class="grid shrink-0 grid-cols-3 border-b border-line"
+				onkeydown={(e) =>
+					tabKeys(
+						e,
+						AGENT_TABS.map(([k]) => k),
+						agentTab,
+						(k) => (agentTab = k),
+						'agent-tab-'
+					)}
+			>
+				{#each AGENT_TABS as [key, label] (key)}
 					<button
 						type="button"
 						role="tab"
 						id="agent-tab-{key}"
 						aria-selected={agentTab === key}
 						aria-controls="agent-panel"
+						tabindex={agentTab === key ? 0 : -1}
 						class="min-h-12 px-2 text-sm {agentTab === key
 							? 'font-semibold shadow-[inset_0_-2px_0_var(--color-teal)]'
-							: 'bg-[#F7F8F9] text-muted hover:text-ink'}"
+							: 'bg-subtle text-muted hover:text-ink'}"
 						onclick={() => (agentTab = key)}>{label}</button
 					>
 				{/each}

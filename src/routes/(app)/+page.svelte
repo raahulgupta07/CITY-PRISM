@@ -3,6 +3,8 @@
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { api, DUE_DATE, MODE_LABELS, type Mode, type Project } from '$lib/api';
+	import { VERDICT_FILL, VERDICT_ON_DARK } from '$lib/colours';
+	import { menu } from '$lib/menu';
 	import ScoreCell from '$lib/components/ScoreCell.svelte';
 	import SummaryPanel from '$lib/components/SummaryPanel.svelte';
 	import VerdictMark from '$lib/components/VerdictMark.svelte';
@@ -32,6 +34,10 @@
 	const canCreate = $derived(session.user?.role !== 'approver');
 	const canExport = $derived(session.user?.role === 'admin');
 	let showSummary = $state(false);
+	let filtersOpen = $state(false);
+	const filterCount = $derived(
+		Object.values(hidden).filter((l) => l.length).length + (owner ? 1 : 0) + (mine ? 1 : 0)
+	);
 
 	$effect(() => {
 		const query = archivedOnly ? '?archived=true' : '';
@@ -73,11 +79,11 @@
 	}
 
 	const VERDICTS: Verdict[] = ['fix', 'go', 'ready', 'not_assessed'];
-	const MARK: Record<Verdict, string> = {
-		fix: 'background:#B3261E',
-		go: 'background:#C77C00',
-		ready: 'background:#1F7A4C',
-		not_assessed: 'border:1px solid #7A8494'
+	const COUNT_LABELS: Record<Verdict, string> = {
+		fix: 'Fix',
+		go: 'Go with actions',
+		ready: 'Ready',
+		not_assessed: 'Not assessed'
 	};
 	const verdictCounts = $derived(
 		Object.fromEntries(
@@ -116,7 +122,7 @@
 <svelte:head><title>Portfolio · City Prism</title></svelte:head>
 
 <!-- Dark band: headline from the rules, verdict counts, answered bar -->
-<section class="bg-navy px-4 pt-8 pb-8 text-[#E6ECF2] sm:px-8" aria-labelledby="headline">
+<section class="band bg-navy px-4 pt-8 pb-8 text-band-ink sm:px-8" aria-labelledby="headline">
 	<div class="flex flex-wrap items-end justify-between gap-8">
 		<div class="max-w-3xl">
 			<p class="font-mono text-xs tracking-[0.04em] text-teal-on-dark">
@@ -129,24 +135,27 @@
 				>
 					{sentences.headline}
 				</h1>
-				<p class="mt-4 text-[17px] leading-relaxed text-[#C9D2DC]">{sentences.detail}</p>
+				<p class="mt-4 text-[17px] leading-relaxed text-band-soft">{sentences.detail}</p>
 			{:else}
 				<h1 id="headline" class="mt-4 font-condensed text-3xl text-white">AI project portfolio</h1>
 			{/if}
 		</div>
 		<div class="w-full max-w-md">
-			<dl class="grid grid-cols-4 divide-x divide-[#2A3A52]">
-				{#each [['fix', 'Fix', '#FF7A6B'], ['go', 'Go with actions', '#F5B84A'], ['ready', 'Ready', '#5FD39A'], ['not_assessed', 'Not assessed', '#FFFFFF']] as [v, label, colour] (v)}
-					<div class="px-3 first:pl-0">
-						<dd class="font-mono text-3xl" style:color={colour}>{verdictCounts[v] ?? 0}</dd>
-						<dt class="text-xs leading-tight text-[#AEB9C6]">{label}</dt>
+			<dl class="grid grid-cols-4 divide-x divide-band-line">
+				{#each VERDICTS as v (v)}
+					<!-- dt comes first for screen readers; flex shows the number on top. -->
+					<div class="flex flex-col-reverse px-3 first:pl-0">
+						<dt class="text-xs leading-tight text-band-muted">{COUNT_LABELS[v]}</dt>
+						<dd class="font-mono text-3xl" style:color={VERDICT_ON_DARK[v]}>
+							{verdictCounts[v] ?? 0}
+						</dd>
 					</div>
 				{/each}
 			</dl>
 			<div class="mt-5 flex items-center gap-3 text-sm">
-				<span class="text-[#AEB9C6]">Answered</span>
+				<span class="text-band-muted">Answered</span>
 				<div
-					class="h-1 flex-1 bg-[#2A3A52]"
+					class="h-1 flex-1 bg-band-line"
 					role="progressbar"
 					aria-label="Questions answered"
 					aria-valuemin={0}
@@ -168,8 +177,25 @@
 
 <div class="flex flex-col lg:flex-row">
 	<!-- Filter rail -->
+	<!-- On narrow screens the filters fold away behind a button. -->
+	<div class="flex items-center justify-between border-b border-line bg-subtle px-4 py-2 lg:hidden">
+		<button
+			type="button"
+			class="btn"
+			aria-expanded={filtersOpen}
+			aria-controls="filters"
+			onclick={() => (filtersOpen = !filtersOpen)}
+			>{filtersOpen ? 'Hide filters' : 'Filters'}{#if filterCount}<span class="font-mono text-xs"
+					>({filterCount} on)</span
+				>{/if}</button
+		>
+		<span class="text-sm text-muted">{visible.length} of {projects.length} shown</span>
+	</div>
 	<aside
-		class="border-b border-line bg-[#F7F8F9] px-4 py-5 lg:w-60 lg:shrink-0 lg:border-r lg:border-b-0"
+		id="filters"
+		class="border-b border-line bg-subtle px-4 py-5 lg:block lg:w-60 lg:shrink-0 lg:border-r lg:border-b-0 {filtersOpen
+			? ''
+			: 'hidden'}"
 		aria-label="Filters"
 	>
 		<fieldset>
@@ -181,7 +207,13 @@
 						checked={!hidden.verdict.includes(v)}
 						onchange={() => toggle('verdict', v)}
 					/>
-					<span aria-hidden="true" class="size-2 shrink-0" style={MARK[v]}></span>
+					<span
+						aria-hidden="true"
+						class="size-2 shrink-0"
+						style:background={VERDICT_FILL[v]}
+						class:border={v === 'not_assessed'}
+						class:border-hollow={v === 'not_assessed'}
+					></span>
 					<span class="flex-1">{VERDICT_LABELS[v]}</span>
 					<span class="text-muted">{verdictCounts[v]}</span>
 				</label>
@@ -261,7 +293,7 @@
 				{#each stuck as s (s.id)}
 					<li class="grid grid-cols-[5.5rem_1fr_1.5rem] items-center gap-2 text-sm">
 						<span>{DIM_SHORT[s.id]}</span>
-						<span class="h-2 bg-[#DCE0E5]"
+						<span class="h-2 bg-track"
 							><span class="block h-2 bg-ink" style:width="{(s.n / stuckMax) * 100}%"></span></span
 						>
 						<span class="text-right font-mono text-xs">{s.n}</span>
@@ -291,7 +323,7 @@
 					onclick={() => (showSummary = !showSummary)}>AI portfolio summary</button
 				>
 				{#if canExport}
-					<details class="export relative">
+					<details class="export relative" use:menu>
 						<summary class="btn list-none">Export</summary>
 						<div
 							class="absolute right-0 z-20 mt-1 flex w-56 flex-col border border-line bg-panel py-1 shadow-md"
@@ -326,7 +358,42 @@
 		{:else if visible.length === 0}
 			<p class="p-5 text-muted">No projects match these filters.</p>
 		{:else}
-			<div class="overflow-x-auto p-4 sm:p-5">
+			<!-- Phone: one card per project -->
+			<ul class="space-y-3 p-4 md:hidden" aria-label="Projects, weakest first">
+				{#each visible as p (p.id)}
+					<li class="border border-line bg-panel p-4">
+						<a
+							href={resolve(`/projects/${p.id}`)}
+							class="flex min-h-11 items-center font-medium text-ink underline-offset-4 hover:text-teal hover:underline"
+							>{p.name}</a
+						>
+						<p class="text-xs text-muted">
+							{p.business_unit || 'No business unit'} · {p.stage} · {p.owner?.name ?? 'No owner'}
+						</p>
+						<div class="mt-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-sm">
+							<VerdictMark score={p.score} />
+							<span class="font-mono text-xs text-muted">{p.score.answered}/40 answered</span>
+						</div>
+						{#if p.score.lowest !== null}
+							<p class="mt-1 text-sm">
+								Weakest link: <span class="font-mono text-xs">{weakText(p)}</span>
+							</p>
+						{/if}
+						<ul class="mt-3 grid grid-cols-8 gap-0.5" aria-label="Scores by dimension">
+							{#each p.score.dimensions as dim (dim.id)}
+								<li class="text-center">
+									<ScoreCell {dim} weakest={p.score.weakest.includes(dim.id)} />
+									<span aria-hidden="true" class="font-mono text-[10px] text-muted"
+										>{DIM_ABBR[dim.id]}</span
+									>
+								</li>
+							{/each}
+						</ul>
+					</li>
+				{/each}
+			</ul>
+
+			<div class="hidden overflow-x-auto p-4 sm:p-5 md:block">
 				<table class="w-full min-w-[1080px] border border-line bg-panel text-sm">
 					<thead>
 						<tr
@@ -347,7 +414,7 @@
 					</thead>
 					<tbody>
 						{#each visible as p (p.id)}
-							<tr class="border-b border-[#E1E5EA] last:border-0 hover:bg-[#F7F8F9]">
+							<tr class="border-b border-divider last:border-0 hover:bg-subtle">
 								<td class="px-3 py-2">
 									<a
 										href={resolve(`/projects/${p.id}`)}
@@ -370,7 +437,7 @@
 								<td class="px-2 py-2"><VerdictMark score={p.score} /></td>
 								<td class="px-2 py-2">
 									<span class="font-mono text-xs">{p.score.answered}/40</span>
-									<span class="mt-1 block h-1 w-16 bg-[#E1E5EA]"
+									<span class="mt-1 block h-1 w-16 bg-divider"
 										><span class="block h-1 bg-teal" style:width="{p.score.coverage * 100}%"
 										></span></span
 									>
@@ -401,7 +468,7 @@
 	}
 	.rail-row {
 		display: flex;
-		min-height: 2.25rem;
+		min-height: 2.75rem;
 		align-items: center;
 		gap: 0.5rem;
 		font-size: 0.9rem;

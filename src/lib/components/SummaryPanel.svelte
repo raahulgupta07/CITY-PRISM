@@ -53,14 +53,14 @@
 		</h2>
 		<div class="flex flex-wrap gap-2">
 			{#if phase === 'writing'}
-				<button type="button" class="btn min-h-9" onclick={stop}>Stop</button>
+				<button type="button" class="btn min-h-11" onclick={stop}>Stop</button>
 			{:else}
-				<button type="button" class="btn min-h-9" onclick={copy} disabled={!text}
+				<button type="button" class="btn min-h-11" onclick={copy} disabled={!text}
 					>{copied ? 'Copied' : 'Copy'}</button
 				>
-				<button type="button" class="btn min-h-9" onclick={write}>Write again</button>
+				<button type="button" class="btn min-h-11" onclick={write}>Write again</button>
 			{/if}
-			<button type="button" class="btn min-h-9" onclick={onclose}>Close</button>
+			<button type="button" class="btn min-h-11" onclick={onclose}>Close</button>
 		</div>
 	</div>
 	<div aria-live="polite" aria-busy={phase === 'writing'}>
@@ -72,7 +72,7 @@
 			<p class="mt-3 text-sm">The AI is reading the portfolio…</p>
 		{/if}
 		{#if phase === 'stopped'}<p class="mt-2 text-sm">Stopped.</p>{/if}
-		{#if error}<p role="alert" class="mt-2 text-sm text-weak">{error}</p>{/if}
+		{#if error}<p role="alert" class="mt-2 text-sm text-danger">{error}</p>{/if}
 	</div>
 	<p class="mt-3 text-xs">
 		The AI sees each project's verdict, weakest link and answered count, not the evidence. Verdicts

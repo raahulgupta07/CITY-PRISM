@@ -2,6 +2,7 @@
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { api, type Brief, type Dimension, type ProjectDetail, type Score } from '$lib/api';
+	import { VERDICT_ON_DARK } from '$lib/colours';
 	import { TOTAL_QUESTIONS, VERDICT_LABELS } from '$lib/scoring';
 	import { session } from '$lib/session.svelte';
 	import { DIM_SHORT, formatDateTime, formatScore, joinAnd } from '$lib/text';
@@ -101,7 +102,6 @@
 		return `Version ${n} · ${formatDateTime(b.created_at)}${b.approved ? ' · approved' : ''}`;
 	}
 
-	const ON_DARK = { fix: '#FF7A6B', go: '#F5B84A', ready: '#5FD39A', not_assessed: '#FFFFFF' };
 	const BAR = { weak: 'bg-weak', partial: 'bg-partial', strong: 'bg-strong', none: 'bg-line' };
 </script>
 
@@ -118,13 +118,14 @@
 	<p class="p-6 text-muted">Loading the decision brief…</p>
 {:else}
 	<!-- Dark band: the rules result -->
-	<section class="bg-navy px-4 pt-5 pb-7 text-[#E6ECF2] sm:px-7">
-		<nav aria-label="Breadcrumb" class="text-sm text-[#AEB9C6]">
-			<a href={resolve('/')} class="text-[#AEB9C6] underline-offset-4 hover:underline">Portfolio</a>
+	<section class="band bg-navy px-4 pt-5 pb-7 text-band-ink sm:px-7">
+		<nav aria-label="Breadcrumb" class="text-sm text-band-muted">
+			<a href={resolve('/')} class="text-band-muted underline-offset-4 hover:underline">Portfolio</a
+			>
 			/
 			<a
 				href={resolve(`/projects/${project.id}`)}
-				class="text-[#AEB9C6] underline-offset-4 hover:underline">{project.name}</a
+				class="text-band-muted underline-offset-4 hover:underline">{project.name}</a
 			>
 			/ <span class="text-white">Decision brief</span>
 		</nav>
@@ -134,16 +135,17 @@
 				<p class="font-mono text-xs tracking-[0.04em] text-teal-on-dark">
 					{project.name.toUpperCase()} · {project.business_unit || 'No business unit'} · {project.stage}
 				</p>
-				<p class="mt-3 text-sm text-[#AEB9C6]">Verdict from the rules</p>
+				<p class="mt-3 text-sm text-band-muted">Verdict from the rules</p>
 				<h1
 					class="font-condensed text-4xl leading-tight font-semibold sm:text-6xl"
-					style:color={ON_DARK[shown.verdict]}
+					style:color={VERDICT_ON_DARK[shown.verdict]}
 				>
 					{VERDICT_LABELS[shown.verdict]}
 				</h1>
 				<p class="mt-3 flex flex-wrap items-center gap-3 text-sm">
 					{#if shown.partial}
-						<span class="border border-[#F5B84A] px-2 py-0.5 font-mono text-xs text-[#F5B84A]"
+						<span
+							class="border border-partial-on-dark px-2 py-0.5 font-mono text-xs text-partial-on-dark"
 							>Partial: {shown.answered} of {TOTAL_QUESTIONS} answered</span
 						>
 					{/if}
@@ -160,10 +162,10 @@
 
 			<div class="flex w-full flex-col gap-2 sm:w-auto sm:min-w-64">
 				{#if briefs.length > 1}
-					<label class="text-sm text-[#AEB9C6]" for="version">Brief version</label>
+					<label class="text-sm text-band-muted" for="version">Brief version</label>
 					<select
 						id="version"
-						class="min-h-11 border border-[#2A3A52] bg-[#15233A] px-2 text-white"
+						class="min-h-11 border border-band-line bg-band-raised px-2 text-white"
 						bind:value={selected}
 					>
 						{#each briefs as b, i (b.id)}<option value={b.id}>{versionLabel(b, i)}</option>{/each}
@@ -181,7 +183,7 @@
 				{#if canApprove}
 					<button
 						type="button"
-						class="min-h-11 bg-[#5FD39A] px-4 text-sm font-semibold text-[#0A1424] hover:bg-[#7FE3B2] disabled:opacity-55"
+						class="min-h-11 bg-strong-on-dark px-4 text-sm font-semibold text-navy hover:bg-strong-on-dark-hover disabled:opacity-55"
 						onclick={approve}
 						disabled={!!busy}>{busy === 'approve' ? 'Approving…' : 'Approve decision'}</button
 					>
@@ -192,7 +194,7 @@
 
 	<div aria-live="polite">
 		{#if error}
-			<p role="alert" class="border-b border-line bg-[#FBEAEA] px-4 py-2 text-sm sm:px-7">
+			<p role="alert" class="border-b border-line bg-error-bg px-4 py-2 text-sm sm:px-7">
 				{error}
 			</p>
 		{/if}
@@ -201,7 +203,7 @@
 		{/if}
 	</div>
 	{#if project.archived}
-		<p class="border-b border-line bg-[#FFF6E0] px-4 py-2 text-sm sm:px-7">
+		<p class="border-b border-line bg-warn-bg px-4 py-2 text-sm sm:px-7">
 			This project is archived. Its briefs are kept but cannot be changed or approved.
 		</p>
 	{/if}
@@ -241,7 +243,7 @@
 					You are looking at an older version.
 					<button
 						type="button"
-						class="text-teal underline underline-offset-4"
+						class="min-h-11 text-teal underline underline-offset-4"
 						onclick={() => (selected = briefs[0].id)}>Show the latest</button
 					>
 				</p>

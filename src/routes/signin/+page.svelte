@@ -30,18 +30,18 @@
 	}
 </script>
 
-<div class="flex min-h-screen flex-col bg-navy text-white">
+<div class="band flex min-h-screen flex-col bg-navy text-white">
 	<main class="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-4 py-10">
 		<p class="font-mono text-xs tracking-[0.08em] text-teal-on-dark">CITY HOLDINGS · CITY AI</p>
 		<h1 class="mt-2 font-condensed text-4xl font-semibold">City Prism</h1>
-		<p class="mt-2 text-[#C9D2DC]">Check if each AI project is ready for its next stage.</p>
+		<p class="mt-2 text-band-soft">Check if each AI project is ready for its next stage.</p>
 
 		{#if error}
-			<p role="alert" class="mt-6 border-l-4 border-weak bg-white p-3 text-ink">{error}</p>
+			<p role="alert" class="mt-6 border-l-4 border-weak bg-panel p-3 text-ink">{error}</p>
 		{/if}
 
 		{#if options?.provider === 'dev'}
-			<section class="mt-8 bg-white p-5 text-ink" aria-labelledby="dev-title">
+			<section class="mt-8 bg-panel p-5 text-ink" aria-labelledby="dev-title">
 				<h2 id="dev-title" class="font-semibold">Sign in as</h2>
 				<p class="mt-1 text-sm text-muted">Test sign-in. Company sign-in replaces this later.</p>
 				<ul class="mt-4 divide-y divide-line border-y border-line">
@@ -63,7 +63,7 @@
 				</ul>
 			</section>
 		{:else if options}
-			<p class="mt-8 bg-white p-4 text-ink">
+			<p class="mt-8 bg-panel p-4 text-ink">
 				Company sign-in is not set up yet. Please contact the City AI team.
 			</p>
 		{/if}
