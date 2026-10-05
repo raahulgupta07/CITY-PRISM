@@ -48,3 +48,123 @@ export const ROLE_LABELS: Record<Role, string> = {
 	approver: 'Approver',
 	admin: 'Admin'
 };
+
+// ---- Framework, projects, answers ----
+
+export type Stage = 'Idea' | 'Feasibility' | 'Build' | 'Pilot / UAT' | 'Production' | 'On hold';
+export type Mode = 'plan' | 'assess';
+export type AnswerValue = 'Yes' | 'Partly' | 'No' | 'Dont_know';
+
+export const STAGES: Stage[] = [
+	'Idea',
+	'Feasibility',
+	'Build',
+	'Pilot / UAT',
+	'Production',
+	'On hold'
+];
+export const MODE_LABELS: Record<Mode, string> = {
+	plan: 'Planning a new project',
+	assess: 'Assessing an existing project'
+};
+export const ANSWER_LABELS: Record<AnswerValue, string> = {
+	Yes: 'Yes',
+	Partly: 'Partly',
+	No: 'No',
+	Dont_know: "Don't know"
+};
+export const ANSWER_VALUES: AnswerValue[] = ['Yes', 'Partly', 'No', 'Dont_know'];
+export const EVIDENCE_MAX = 600;
+export const DUE_DATE = '2026-10-30';
+
+export interface Question {
+	id: string;
+	dimension_id: number;
+	number: number;
+	text: string;
+	is_draft: boolean;
+	active: boolean;
+	version: number;
+}
+
+export interface Dimension {
+	id: number;
+	title: string;
+	group_name: string;
+	lead_question: string;
+	sort_order: number;
+	questions: Question[];
+}
+
+export interface UserRef {
+	id: string;
+	name: string;
+}
+
+export interface DimensionScore {
+	id: number;
+	score: number | null;
+	raw: number | null;
+	capped: boolean;
+	has_no: boolean;
+	answered: number;
+	band: 'weak' | 'partial' | 'strong' | 'none';
+}
+
+export interface Score {
+	dimensions: DimensionScore[];
+	lowest: number | null;
+	weakest: number[];
+	verdict: 'fix' | 'go' | 'ready' | 'not_assessed';
+	answered: number;
+	coverage: number;
+	partial: boolean;
+}
+
+export interface Project {
+	id: string;
+	name: string;
+	business_unit: string;
+	sponsor: string;
+	owner: UserRef | null;
+	stage: Stage;
+	mode: Mode;
+	due_date: string | null;
+	archived: boolean;
+	created_at: string;
+	updated_at: string;
+	can_edit: boolean;
+	score: Score;
+}
+
+export interface AnswerRow {
+	question_id: string;
+	answer: AnswerValue | null;
+	evidence: string;
+	source: 'person' | 'ai_interview' | 'ai_evidence';
+	confirmed: boolean;
+	updated_by: UserRef | null;
+	updated_at: string;
+}
+
+export interface ProjectDetail extends Project {
+	answers: AnswerRow[];
+}
+
+export interface AnswerSaved {
+	answer: AnswerRow;
+	score: Score;
+	changed: boolean;
+}
+
+export interface HistoryRow {
+	id: number;
+	question_id: string;
+	old_answer: AnswerValue | null;
+	new_answer: AnswerValue | null;
+	old_evidence: string;
+	new_evidence: string;
+	source: 'person' | 'ai_interview' | 'ai_evidence' | 'confirm' | 'undo';
+	changed_by: UserRef | null;
+	changed_at: string;
+}

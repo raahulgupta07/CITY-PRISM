@@ -109,7 +109,7 @@ class Project(Base):
     owner_user_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"), index=True)
     stage: Mapped[str] = mapped_column(String(20), default="Idea")
     mode: Mapped[str] = mapped_column(String(10), default="assess")
-    due_date: Mapped[date | None] = mapped_column(Date, default=DEFAULT_DUE_DATE)
+    due_date: Mapped[date | None] = mapped_column(Date)  # 2026-10-30 for assessments
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=_now, onupdate=_now

@@ -41,3 +41,19 @@ def client(settings_env: Path) -> Iterator[TestClient]:
 def db(client: TestClient) -> Iterator[Session]:
     with SessionLocal() as session:
         yield session
+
+
+ADMIN_EMAIL = "rahulgupta@cityholdings.com.mm"
+
+
+def login(client: TestClient, email: str) -> dict:
+    r = client.post("/api/auth/login", json={"email": email})
+    assert r.status_code == 200, r.text
+    return r.json()
+
+
+def project_id(client: TestClient, name: str) -> str:
+    for p in client.get("/api/projects").json():
+        if p["name"] == name:
+            return p["id"]
+    raise AssertionError(f"no project {name}")

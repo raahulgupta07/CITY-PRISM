@@ -34,3 +34,57 @@ html {
 	outline: 2px solid var(--color-teal);
 	outline-offset: 2px;
 }
+
+@layer components {
+	.btn-primary,
+	.btn {
+		display: inline-flex;
+		min-height: 2.75rem;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		padding: 0 1rem;
+		font-size: 0.875rem;
+		font-weight: 600;
+		text-decoration: none;
+		cursor: pointer;
+	}
+	.btn-primary {
+		background: var(--color-teal);
+		color: #fff;
+	}
+	.btn-primary:hover {
+		background: var(--color-teal-dark);
+	}
+	.btn {
+		border: 1px solid var(--color-line);
+		background: #fff;
+		color: var(--color-ink);
+		font-weight: 500;
+	}
+	.btn:hover {
+		border-color: var(--color-ink);
+	}
+	.btn-primary:disabled,
+	.btn:disabled {
+		cursor: not-allowed;
+		opacity: 0.55;
+	}
+	.field {
+		min-height: 2.75rem;
+		border: 1px solid var(--color-line);
+		background: #fff;
+		padding: 0.5rem 0.625rem;
+		font: inherit;
+		color: var(--color-ink);
+	}
+	.field:focus {
+		border-color: var(--color-teal);
+	}
+	.label {
+		display: block;
+		margin-bottom: 0.25rem;
+		font-size: 0.875rem;
+		font-weight: 600;
+	}
+}

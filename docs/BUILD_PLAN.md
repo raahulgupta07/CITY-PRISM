@@ -100,7 +100,7 @@ Server
 4. `PUT /api/projects/:id/answers/:qid` → `{answer, evidence}`; writes `answer_history` in the same transaction; returns the new score. Evidence max 600 characters.
 5. `POST /api/projects/:id/answers/:qid/confirm` (turns an `ai_*` answer into a confirmed one).
 6. `GET /api/projects/:id/history`.
-7. Admin: `GET/PUT /api/admin/questions/:id` (new version on save, draft flag), `GET/PATCH /api/admin/users/:id` (role).
+7. Admin: `PUT /api/admin/questions/:id` (new version when the wording changes, draft flag), `PUT /api/admin/dimensions/:id` (lead question), `GET/POST /api/admin/users`, `PATCH /api/admin/users/:id` (role; the last admin cannot be removed).
 
 Screens (B + C design)
 1. App shell: navy header, theme switch, user menu.
@@ -110,10 +110,10 @@ Screens (B + C design)
 5. Admin: question set editor, users and roles.
 
 Done when
-- [ ] Portfolio shows all 12 seed projects with correct scores, verdicts and weakest links.
-- [ ] An owner can only edit their own projects; a reviewer can edit any; an approver cannot edit.
-- [ ] Every change appears in history.
-- [ ] Portfolio loads in under 2 s with 200 generated projects (load test script).
+- [x] Portfolio shows all 12 seed projects with correct scores, verdicts and weakest links.
+- [x] An owner can only edit their own projects; a reviewer can edit any; an approver cannot edit.
+- [x] Every change appears in history.
+- [x] Portfolio loads in under 2 s with 200 generated projects (load test script).
 
 ---
 
