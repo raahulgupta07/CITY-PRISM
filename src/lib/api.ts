@@ -210,3 +210,33 @@ export interface AcceptAllOut {
 	answers: AnswerRow[];
 	score: Score;
 }
+
+// ---- Decision brief ----
+
+export interface BriefAction {
+	question_id: string;
+	action: string;
+	owner: string;
+}
+
+export interface Brief {
+	id: string;
+	project_id: string;
+	created_at: string;
+	created_by: UserRef | null;
+	// Snapshot of the rules result when the brief was written. Never from AI.
+	verdict: Score['verdict'];
+	lowest: number | null;
+	weakest: number[];
+	dimensions: DimensionScore[];
+	answered: number;
+	// Written by AI.
+	headline: string;
+	summary: string;
+	actions: BriefAction[];
+	risks: string[];
+	approved: boolean;
+	approved_by: UserRef | null;
+	approved_at: string | null;
+	changed_since: boolean;
+}

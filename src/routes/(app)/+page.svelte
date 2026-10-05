@@ -4,6 +4,7 @@
 	import { page } from '$app/state';
 	import { api, DUE_DATE, MODE_LABELS, type Mode, type Project } from '$lib/api';
 	import ScoreCell from '$lib/components/ScoreCell.svelte';
+	import SummaryPanel from '$lib/components/SummaryPanel.svelte';
 	import VerdictMark from '$lib/components/VerdictMark.svelte';
 	import { DIMENSION_IDS, VERDICT_LABELS, type Verdict } from '$lib/scoring';
 	import { session } from '$lib/session.svelte';
@@ -29,6 +30,8 @@
 
 	const mine = $derived(page.url.searchParams.get('mine') === '1');
 	const canCreate = $derived(session.user?.role !== 'approver');
+	const canExport = $derived(session.user?.role === 'admin');
+	let showSummary = $state(false);
 
 	$effect(() => {
 		const query = archivedOnly ? '?archived=true' : '';
@@ -280,10 +283,41 @@
 					>{visible.length} of {projects.length} projects · weakest first</span
 				>
 			</h2>
-			{#if canCreate}
-				<a href={resolve('/projects/new')} class="btn-primary">New project</a>
-			{/if}
+			<div class="flex flex-wrap gap-2">
+				<button
+					type="button"
+					class="btn"
+					aria-expanded={showSummary}
+					onclick={() => (showSummary = !showSummary)}>AI portfolio summary</button
+				>
+				{#if canExport}
+					<details class="export relative">
+						<summary class="btn list-none">Export</summary>
+						<div
+							class="absolute right-0 z-20 mt-1 flex w-56 flex-col border border-line bg-panel py-1 shadow-md"
+						>
+							<!-- eslint-disable svelte/no-navigation-without-resolve -- server files, not pages -->
+							<a href="/api/export.xlsx" download class="export-item"
+								>Excel (.xlsx)<span>Answers and Portfolio sheets</span></a
+							>
+							<a href="/api/export.csv" download class="export-item"
+								>CSV<span>One row per project and question</span></a
+							>
+							<!-- eslint-enable svelte/no-navigation-without-resolve -->
+						</div>
+					</details>
+				{/if}
+				{#if canCreate}
+					<a href={resolve('/projects/new')} class="btn-primary">New project</a>
+				{/if}
+			</div>
 		</div>
+
+		{#if showSummary}
+			<div class="px-4 pt-4 sm:px-5">
+				<SummaryPanel onclose={() => (showSummary = false)} />
+			</div>
+		{/if}
 
 		{#if error}
 			<p role="alert" class="m-5 border-l-4 border-weak bg-panel p-4">{error}</p>
@@ -372,6 +406,26 @@
 		gap: 0.5rem;
 		font-size: 0.9rem;
 		cursor: pointer;
+	}
+	.export summary::-webkit-details-marker {
+		display: none;
+	}
+	.export-item {
+		display: flex;
+		min-height: 2.75rem;
+		flex-direction: column;
+		justify-content: center;
+		padding: 0.25rem 0.875rem;
+		font-size: 0.9rem;
+		color: var(--color-ink);
+		text-decoration: none;
+	}
+	.export-item:hover {
+		background: var(--color-canvas);
+	}
+	.export-item span {
+		font-size: 0.75rem;
+		color: var(--color-muted);
 	}
 	.rail-row input {
 		width: 1.1rem;

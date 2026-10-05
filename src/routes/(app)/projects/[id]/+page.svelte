@@ -249,6 +249,9 @@
 					<div class="h-1 bg-teal-on-dark" style:width="{score.coverage * 100}%"></div>
 				</div>
 				<p class="mt-3 text-sm"><VerdictMark {score} dark /></p>
+				<a href={resolve(`/projects/${project.id}/brief`)} class="btn-primary mt-3 w-full"
+					>Decision brief →</a
+				>
 				{#if canArchive}
 					<button
 						type="button"

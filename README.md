@@ -44,10 +44,22 @@ sign-in is off until the company SSO is connected.
 ## The AI
 
 The agent calls OpenRouter from the server only. Set `OPENROUTER_API_KEY`,
-`LLM_MODEL_FAST` (Interview) and `LLM_MODEL_DEFAULT` (Read evidence) in `.env`.
+`LLM_MODEL_FAST` (Interview) and `LLM_MODEL_DEFAULT` (Read evidence, decision
+brief, portfolio summary) in `.env`.
 Without them the app works, and the agent says the AI is not set up yet.
 Every call is logged in the `ai_calls` table (admins: `GET /api/admin/ai-calls`).
 Tests use a fake OpenRouter, so they never call a real model.
+
+The decision brief saves the rules result (verdict, scores, weakest link) as a
+snapshot first; the AI only writes the headline, summary, actions and risks.
+The portfolio summary streams to the screen as server-sent events
+(`POST /api/portfolio/summary`); pressing Stop is logged as `stopped`.
+
+## Export
+
+Admins can download the portfolio from the Export menu:
+`GET /api/export.xlsx` (sheets "Answers" and "Portfolio") or `GET /api/export.csv`.
+Text that starts with `=`, `+`, `-` or `@` is never run as a formula.
 
 ## Checks
 
@@ -67,7 +79,7 @@ backend/app/db/           tables (models.py), engine, migrations runner
 backend/alembic/          migrations
 backend/app/seed.py       framework, admin, 12 projects (python -m app.seed)
 backend/app/auth/         sign-in provider, session cookie, role checks
-backend/app/services/     permissions, answer history and undo, file text
+backend/app/services/     permissions, answer history and undo, file text, export
 backend/app/llm/          OpenRouter client and call log, prompts, reply checks
 src/lib/scoring.ts        same rules for the screen
 src/routes/               screens (SvelteKit, single-page app)

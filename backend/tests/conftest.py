@@ -76,6 +76,17 @@ class FakeOpenRouter:
         }
         self.replies.append(httpx.Response(status, json=body))
 
+    def stream(self, pieces: list[str], *, status: int = 200, done: bool = True) -> None:
+        lines = [": OPENROUTER PROCESSING", ""]
+        for piece in pieces:
+            chunk = {"choices": [{"delta": {"content": piece}}]}
+            lines += [f"data: {json.dumps(chunk)}", ""]
+        usage = {"prompt_tokens": 300, "completion_tokens": 60, "cost": 0.0002}
+        lines += [f"data: {json.dumps({'choices': [], 'usage': usage})}", ""]
+        if done:
+            lines += ["data: [DONE]", ""]
+        self.replies.append(httpx.Response(status, content="\n".join(lines).encode()))
+
     def fail(self, exc: Exception) -> None:
         self.replies.append(exc)
 

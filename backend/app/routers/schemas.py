@@ -244,3 +244,35 @@ class AcceptAllOut(BaseModel):
     accepted: int
     answers: list[AnswerOut]
     score: ScoreOut
+
+
+# ---- Decision brief ----
+
+
+class BriefActionOut(BaseModel):
+    question_id: str
+    action: str
+    owner: str
+
+
+class BriefOut(BaseModel):
+    id: str
+    project_id: str
+    created_at: datetime
+    created_by: UserRef | None
+    # Snapshot of the rules result when the brief was written. Never from AI.
+    verdict: str
+    lowest: float | None
+    weakest: list[int]
+    dimensions: list[DimensionScoreOut]
+    answered: int
+    # Written by AI.
+    headline: str
+    summary: str
+    actions: list[BriefActionOut]
+    risks: list[str]
+    approved: bool
+    approved_by: UserRef | None
+    approved_at: datetime | None
+    # True when an answer changed after the brief was written.
+    changed_since: bool

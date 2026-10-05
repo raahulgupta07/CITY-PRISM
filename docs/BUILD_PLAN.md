@@ -159,12 +159,12 @@ Server
 Screens
 1. Decision brief: verdict from rules, "Partial: x of 40" note, weakest link, AI headline and summary (marked as written by AI), 8 score bars, top 3 actions, risks, open-questions note, footer text, version picker, Approve (approvers only), Export PDF and Send (disabled, phase 2).
 2. Portfolio summary panel with streaming text, Stop, Copy, Write again.
-3. Export menu (CSV, XLSX).
+3. Export menu (CSV, XLSX), admins only (SPEC §2: "export everything").
 
 Done when
-- [ ] The brief never shows a verdict different from the rules result (test).
-- [ ] Only approvers can approve (test).
-- [ ] Export columns match SPEC §8; the file opens in Excel.
+- [x] The brief never shows a verdict different from the rules result (test).
+- [x] Only approvers can approve (test).
+- [x] Export columns match SPEC §8; the file opens in Excel.
 
 ---
 

@@ -32,3 +32,8 @@ def can_approve_brief(user: User) -> bool:
 def can_manage(user: User) -> bool:
     """Users and roles, the question set, export of everything."""
     return user.role == "admin"
+
+
+def can_export(user: User) -> bool:
+    """SPEC 2: admins export everything."""
+    return user.role == "admin"

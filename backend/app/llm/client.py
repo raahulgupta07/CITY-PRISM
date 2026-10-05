@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 import re
 import time
-from collections.abc import Callable
+from collections.abc import AsyncIterator, Callable
 from typing import Any, Literal, TypeVar
 
 import httpx
@@ -42,6 +42,14 @@ UNREADABLE = "The AI reply could not be read. Nothing was saved. Please try agai
 def model_for(kind: ModelKind) -> str:
     s = get_settings()
     return s.llm_model_fast if kind == "fast" else s.llm_model_default
+
+
+def check_ready(kind: ModelKind) -> str:
+    """The model ID, or NOT_SET_UP when the key or the model is missing."""
+    model = model_for(kind)
+    if not get_settings().openrouter_api_key or not model:
+        raise NOT_SET_UP
+    return model
 
 
 def _log(
@@ -98,9 +106,7 @@ def complete_json(
     does not match the expected shape. Then nothing is saved.
     """
     settings = get_settings()
-    model = model_for(kind)
-    if not settings.openrouter_api_key or not model:
-        raise NOT_SET_UP
+    model = check_ready(kind)
 
     body: dict[str, Any] = {
         "model": model,
@@ -216,3 +222,90 @@ def complete_json(
         latency_ms=elapsed,
     )
     return result
+
+
+async def stream_text(
+    prompt: str,
+    *,
+    kind: ModelKind,
+    feature: str,
+    user_id: str | None,
+    project_id: str | None,
+) -> AsyncIterator[str]:
+    """Yield the reply as it is written. One ai_calls row when the stream ends,
+    including when the person presses Stop ("stopped")."""
+    settings = get_settings()
+    model = check_ready(kind)
+    body = {
+        "model": model,
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.2,
+        "stream": True,
+        "usage": {"include": True},
+    }
+    started = time.perf_counter()
+    usage: dict | None = None
+    error = "stopped"  # until the stream ends on its own
+    wrote = False
+    try:
+        async with (
+            httpx.AsyncClient(
+                transport=transport,  # type: ignore[arg-type]
+                timeout=settings.llm_timeout_seconds,
+            ) as client,
+            client.stream(
+                "POST",
+                f"{settings.openrouter_base_url.rstrip('/')}/chat/completions",
+                json=body,
+                headers={
+                    "Authorization": f"Bearer {settings.openrouter_api_key}",
+                    "X-Title": "City Prism",
+                },
+            ) as response,
+        ):
+            if response.status_code != 200:
+                error = f"http_{response.status_code}"
+                raise LLMError("The AI service did not answer. Please try again later.", error)
+            async for line in response.aiter_lines():
+                if not line.startswith("data:"):
+                    continue  # blank lines and ": keep-alive" comments
+                payload = line[5:].strip()
+                if payload == "[DONE]":
+                    break
+                try:
+                    chunk = json.loads(payload)
+                except ValueError:
+                    continue
+                if chunk.get("error"):
+                    error = "stream_error"
+                    raise LLMError(
+                        "The AI stopped in the middle. Please try again.", "stream_error"
+                    )
+                usage = chunk.get("usage") or usage
+                for choice in chunk.get("choices") or []:
+                    piece = (choice.get("delta") or {}).get("content") or ""
+                    if piece:
+                        wrote = True
+                        yield piece
+        if not wrote:
+            error = "empty"
+            raise LLMError(UNREADABLE, "empty")
+        error = ""
+    except httpx.TimeoutException as exc:
+        error = "timeout"
+        raise LLMError("The AI took too long to answer. Please try again.", "timeout", 504) from exc
+    except httpx.HTTPError as exc:
+        error = "network"
+        raise LLMError(
+            "The AI service could not be reached. Please try again later.", "network"
+        ) from exc
+    finally:
+        _log(
+            user_id=user_id,
+            project_id=project_id,
+            feature=feature,
+            model=model,
+            usage=usage,
+            latency_ms=int((time.perf_counter() - started) * 1000),
+            error=error,
+        )

@@ -69,3 +69,51 @@ def parse_evidence_reply(data: Any, known_ids: set[str]) -> list[EvidenceItem]:
         seen.add(qid)
         items.append(EvidenceItem(id=qid, answer=answer, evidence=_short(raw.get("evidence"))))
     return items[:MAX_SUGGESTIONS]
+
+
+MAX_ACTIONS = 3
+MAX_RISKS = 3
+
+
+class BriefAction(BaseModel):
+    question_id: str
+    action: str
+    owner: str
+
+
+class BriefReply(BaseModel):
+    headline: str
+    summary: str
+    actions: list[BriefAction]
+    risks: list[str]
+
+
+def parse_brief_reply(data: Any, known_ids: set[str]) -> BriefReply:
+    """SPEC 6.4 reply. Needs a headline and a summary; bad actions and extras are dropped."""
+    if not isinstance(data, dict):
+        raise ValueError("expected a JSON object")
+    headline = str(data.get("headline") or "").strip()[:300]
+    summary = str(data.get("summary") or "").strip()[:1500]
+    if not headline or not summary:
+        raise ValueError("missing headline or summary")
+    raw_actions = data.get("actions") or []
+    raw_risks = data.get("risks") or []
+    if not isinstance(raw_actions, list) or not isinstance(raw_risks, list):
+        raise ValueError("actions and risks must be lists")
+    actions: list[BriefAction] = []
+    for raw in raw_actions:
+        if not isinstance(raw, dict):
+            continue
+        qid = str(raw.get("question") or raw.get("question_id") or "").strip()
+        action = str(raw.get("action") or "").strip()[:300]
+        if qid not in known_ids or not action:
+            continue
+        owner = str(raw.get("owner") or "").strip()[:100] or "To assign"
+        actions.append(BriefAction(question_id=qid, action=action, owner=owner))
+    risks = [str(r).strip()[:300] for r in raw_risks if isinstance(r, str) and r.strip()]
+    return BriefReply(
+        headline=headline,
+        summary=summary,
+        actions=actions[:MAX_ACTIONS],
+        risks=risks[:MAX_RISKS],
+    )
